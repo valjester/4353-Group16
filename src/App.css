@@ -14,7 +14,7 @@
 }
 
 .App-header {
-  background-color: #282c34;
+  background-color: darkslategray;
   min-height: 100vh;
   display: flex;
   flex-direction: column;
@@ -22,6 +22,8 @@
   justify-content: center;
   font-size: calc(10px + 2vmin);
   color: white;
+  font-family:'Courier New', Courier, monospace;
+  text-shadow: 2px 2px 3px black;
 }
 
 .App-link {
@@ -35,4 +37,60 @@
   to {
     transform: rotate(360deg);
   }
+}
+
+.login-container {
+  width:fit-content;
+  max-width:500px;
+  min-width:250px;
+  margin: 100px auto;
+  padding: 30px;
+  background-color: rgb(86, 116, 109);
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+label {
+  display: block;
+  margin-top: 5px;
+  margin-bottom: 5px;
+  color: whitesmoke;
+  font-weight: bold;
+  font-size: 15px;
+  font-family:'Courier New', Courier, monospace;
+  text-shadow: 2px 2px 2px black;
+}
+
+input {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 14px;
+  font-family:'Courier New', Courier, monospace;
+  box-sizing: border-box;
+  transition: border-color 0.3s;
+}
+input:focus {
+  border-color: #53857a;
+  outline: none;
+}
+
+button {
+  width: 100%;
+  margin:1px;
+  padding: 12px;
+  background-color: darkslategray;
+  color: white;
+  font-size: 15px;
+  font-family:'Courier New', Courier, monospace;
+  text-shadow: 1px 1px 3px black;
+  font-weight: bold;
+  border: none;
+  border-radius: 4px;
+  cursor:pointer;
+  transition: background-color 0.3s;
+}
+button:hover {
+  background-color: #53857a;
 }
