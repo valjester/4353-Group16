@@ -16,7 +16,7 @@ function Login() {
         alert(`The email ${username} is already registered.`);
       } else {
         localStorage.setItem(username, JSON.stringify({ password }));
-        alert(`Registered as ${username}`);
+        alert(`Registered as ${username}. You may now log in.`);
       }
     } else {
       const user = JSON.parse(localStorage.getItem(username));

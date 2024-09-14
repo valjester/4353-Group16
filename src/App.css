@@ -94,3 +94,51 @@ button {
 button:hover {
   background-color: #53857a;
 }
+
+.profile-container {
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.form-profile {
+  width: 100%;
+  padding: 10px;
+  border-radius: 4px;
+  font-size: 14px;
+  font-family:'Courier New', Courier, monospace;
+  box-sizing: border-box;
+  transition: border-color 0.3s;
+}
+input:focus {
+  border-color: #53857a;
+  outline: none;
+}
+
+.form-profile label {
+  display: block;
+  margin-top: 5px;
+  margin-bottom: 5px;
+  color: whitesmoke;
+  font-weight: bold;
+  font-size: 15px;
+  font-family:'Courier New', Courier, monospace;
+}
+
+select {
+  font-family: 'Courier New', Courier, monospace;
+  color: #000;
+  font-size:17px;
+}
+
+.react-datepicker__day {
+  text-shadow: none;
+  font-family:'Courier New', Courier, monospace;
+}
+
+.react-datepicker__header {
+  text-shadow: none;
+  font-family:'Courier New', Courier, monospace;
+}
