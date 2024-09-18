@@ -1,26 +1,18 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import Modal from './components/Modal';
 import './App.css';
 
 function Login({ onLogin }) {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
-  const [isRegister, setIsRegister] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const navigate = useNavigate();
 
 
   const handleSubmit = (e) => {
     e.preventDefault(); // Prevent page reload
-
-    if (isRegister) {
-      if (localStorage.getItem(username)) {
-        alert(`The email ${username} is already registered.`);
-      } else {
-        localStorage.setItem(username, JSON.stringify({ password }));
-        alert(`Registered as ${username}. You may now log in.`);
-      }
-    } else {
-      const user = JSON.parse(localStorage.getItem(username));
+    const user = JSON.parse(localStorage.getItem(username));
       if (user && user.password === password) {
         alert(`Logged in as ${username}`);
         onLogin();
@@ -28,15 +20,17 @@ function Login({ onLogin }) {
       } else {
         alert('Invalid credentials.');
       }
-    }
   };
+
+  const openModal = () => setIsModalOpen(true);
+  const closeModal = () => setIsModalOpen(false);
 
   return (
     <div className="login-container">
-      <h2>{isRegister ? 'Register' : 'Login'}</h2>
+      <h2>Login</h2>
       <form onSubmit={handleSubmit}>
         <div>
-          <label>Username (E-mail):</label>
+          <label>E-mail:</label>
           <input
             type="email"
             value={username}
@@ -53,24 +47,16 @@ function Login({ onLogin }) {
             required
           />
         </div>
-        <button type="submit">{isRegister ? 'Register' : 'Login'}</button>
+        <button type="submit">Login</button>
       </form>
 
       <div>
-        {/* Conditionally render only the button that makes sense */}
-        {!isRegister && (
-          <button type="button" onClick={() => setIsRegister(true)}>
+      <button type="button" onClick={openModal}>
           Click Here to Register
-          </button>
-
-        )}
-        {isRegister && (
-          <button type="button" onClick={() => setIsRegister(false)}>
-            Click Here to Login
-          </button>
-        )}
-      </div>
-    </div>
+        </button>
+        </div>
+      {isModalOpen && <Modal onClose={closeModal} />}
+</div>
   );
 }
 
