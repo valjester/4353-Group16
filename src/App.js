@@ -24,6 +24,7 @@ function App() {
           <Route path="/login" element={<Login onLogin={() => setIsLoggedIn(true)} />} />
           <Route path="/profile" element={<Profile setFormData={setFormData} />} />
           <Route path="/home" element={<Home formData={formData} />} />
+          <Route path="/eventform" element={<EventForm />} />
         </Routes>
       </header>
     </div>
