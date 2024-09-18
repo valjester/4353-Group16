@@ -22,13 +22,15 @@ const Taskbar = () => {
         color: '#fff',
         fontSize: '16px',
         cursor: 'pointer',
-        }
+        },
     };
 
     return (
         <div style={styles.taskbar}>
         <button style={styles.button} onClick={() => navigate('/home')}>Home</button>
+        <button style={styles.button} onClick={() => navigate('/profile')}>Profile</button>
         <button style={styles.button} onClick={() => navigate('/history')}>History</button>
+        <button style={styles.button} onClick={() => navigate('/eventform')}>Admin</button>
         <button style={styles.button} onClick={() => navigate('/notifications')}>Notifications</button>
         </div>
     );

@@ -89,7 +89,7 @@ function Profile({ setFormData }) {
 
   return (
     <div>
-      <h2>Welcome to your profile!</h2>
+      <h2 className="profile-title">Welcome to your profile!</h2>
 
       <div className="profile-container">
         <h3>Profile Information</h3>

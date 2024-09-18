@@ -4,7 +4,8 @@ import './App.css';
 import Login from './Login';
 import Profile from './Profile';
 import Home from './Home';
-import Taskbar from './components/Taskbar'
+import Taskbar from './components/Taskbar';
+import EventForm from './EventForm';
 
 function App() {
   const [formData, setFormData] = useState({
@@ -23,6 +24,7 @@ function App() {
           <Route path="/login" element={<Login onLogin={() => setIsLoggedIn(true)} />} />
           <Route path="/profile" element={<Profile setFormData={setFormData} />} />
           <Route path="/home" element={<Home formData={formData} />} />
+          <Route path="/eventform" element={<EventForm />} />
         </Routes>
       </header>
     </div>
