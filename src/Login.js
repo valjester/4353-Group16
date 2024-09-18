@@ -2,11 +2,12 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './App.css';
 
-function Login() {
+function Login({ onLogin }) {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [isRegister, setIsRegister] = useState(false);
   const navigate = useNavigate();
+
 
   const handleSubmit = (e) => {
     e.preventDefault(); // Prevent page reload
@@ -22,6 +23,7 @@ function Login() {
       const user = JSON.parse(localStorage.getItem(username));
       if (user && user.password === password) {
         alert(`Logged in as ${username}`);
+        onLogin();
         navigate('/profile');
       } else {
         alert('Invalid credentials.');
