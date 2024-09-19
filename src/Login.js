@@ -13,13 +13,22 @@ function Login({ onLogin }) {
   const handleSubmit = (e) => {
     e.preventDefault(); // Prevent page reload
     const user = JSON.parse(localStorage.getItem(username));
-      if (user && user.password === password) {
-        alert(`Logged in as ${username}`);
-        onLogin();
-        navigate('/profile');
+    if (user && user.password === password) {
+      alert(`Logged in as ${username}`);
+      onLogin();
+
+      // Check if profile data exists
+      const profileData = JSON.parse(localStorage.getItem('userProfile'));
+
+      // Conditional routing based on the existence of profile data
+      if (profileData) {
+        navigate('/home', { state: { name: profileData.fullName } });
       } else {
-        alert('Invalid credentials.');
+        navigate('/profile');
       }
+    } else {
+      alert('Invalid credentials.');
+    }
   };
 
   const openModal = () => setIsModalOpen(true);

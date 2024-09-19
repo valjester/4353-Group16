@@ -1,12 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Select from 'react-select';
 import DatePicker from 'react-datepicker';
-import {useNavigate} from "react-router-dom";
+import { useNavigate } from 'react-router-dom';
 import 'react-datepicker/dist/react-datepicker.css';
 
 function Profile({ setFormData }) {
-  
-
   const stateSelection = [
     {value:'AL', label:'Alabama'},
     {value:'AK', label:'Alaska'},
@@ -60,9 +58,7 @@ function Profile({ setFormData }) {
     {value:'WY', label:'Wyoming'}
 ];
 
-  const skillSelection = [
-    {value:'skill1', label:'Skill 1'}
-  ];
+  const skillSelection = [{ value: 'skill1', label: 'Skill 1' }];
 
   const [fullName, setFullName] = useState('');
   const [address1, setAddress1] = useState('');
@@ -76,15 +72,45 @@ function Profile({ setFormData }) {
   const [endDate, setEndDate] = useState(null);
   const navigate = useNavigate();
 
+  // Load profile data from localStorage when the component mounts
+  useEffect(() => {
+    const savedProfile = JSON.parse(localStorage.getItem('userProfile'));
+    if (savedProfile) {
+      setFullName(savedProfile.fullName || '');
+      setAddress1(savedProfile.address1 || '');
+      setAddress2(savedProfile.address2 || '');
+      setCity(savedProfile.city || '');
+      setState(savedProfile.state || null);
+      setZipcode(savedProfile.zipcode || '');
+      setSkills(savedProfile.skills || []);
+      setPreferences(savedProfile.preferences || '');
+      setStartDate(savedProfile.startDate ? new Date(savedProfile.startDate) : null);
+      setEndDate(savedProfile.endDate ? new Date(savedProfile.endDate) : null);
+    }
+  }, []);
+
   const handleSubmit = (e) => {
     e.preventDefault();
 
-    const data = {
-      fullName
+    const profileData = {
+      fullName,
+      address1,
+      address2,
+      city,
+      state,
+      zipcode,
+      skills,
+      preferences,
+      startDate: startDate ? startDate.toISOString() : null,
+      endDate: endDate ? endDate.toISOString() : null,
     };
 
-    setFormData(data);
-    navigate("/home");
+    // Save the profile data to localStorage
+    localStorage.setItem('userProfile', JSON.stringify(profileData));
+
+    // Set the form data for further processing (if needed)
+    setFormData(profileData);
+    navigate('/home');
   };
 
   return (
@@ -139,11 +165,7 @@ function Profile({ setFormData }) {
 
           <div className="form-profile">
             <label>State</label>
-            <select
-              value={state}
-              onChange={(e) => setState(e.target.value)}
-              required
-            >
+            <select value={state} onChange={(e) => setState(e.target.value)} required>
               <option value="">Select a state</option>
               {stateSelection.map((option) => (
                 <option key={option.value} value={option.value}>
