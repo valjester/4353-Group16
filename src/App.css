@@ -2,19 +2,8 @@
   text-align: center;
 }
 
-.App-logo {
-  height: 40vmin;
-  pointer-events: none;
-}
-
-@media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-spin infinite 20s linear;
-  }
-}
-
 .App-header {
-  background-color: darkslategray;
+  background-color: #003535;
   min-height: 100vh;
   display: flex;
   flex-direction: column;
@@ -30,24 +19,16 @@
   color: #61dafb;
 }
 
-@keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
-}
-
 .login-container {
   width:fit-content;
   max-width:500px;
   min-width:250px;
-  margin: 100px auto;
-  padding: 30px;
-  background-color: rgb(86, 116, 109);
-  border-radius: 8px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  margin: 80px auto;
+  padding: 40px;
+  background-color: #006969;
+  border-radius: 12px;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+  background: linear-gradient(to right, #004d4d, #006969);
 }
 
 label {
@@ -80,7 +61,7 @@ button {
   width: 100%;
   margin:1px;
   padding: 12px;
-  background-color: darkslategray;
+  background-color: #003535;
   color: white;
   font-size: 15px;
   font-family:'Courier New', Courier, monospace;
@@ -92,7 +73,10 @@ button {
   transition: background-color 0.3s;
 }
 button:hover {
-  background-color: #53857a;
+  background-color: #18b6b6;
+  box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.5);
+  text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.6);
+  background: linear-gradient(to right, #65e6e660, #00353565);
 }
 
 .profile-container {
