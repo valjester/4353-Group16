@@ -5,6 +5,7 @@ function Modal({ onClose }) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [role, setRole] = useState('volunteer');
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -16,7 +17,8 @@ function Modal({ onClose }) {
 
     if (localStorage.getItem(email)) {
       alert(`The email ${email} is already registered.`);
-    } else {
+    } 
+    else {
       localStorage.setItem(email, JSON.stringify({ password }));
       alert(`Registered successfully as ${email}. You may now log in.`);
       onClose();
@@ -60,6 +62,13 @@ function Modal({ onClose }) {
               onChange={(e) => setConfirmPassword(e.target.value)}
               required
             />
+          </p>
+          <p>
+            Role:
+            <select value={role} onChange={(e) => setRole(e.target.value)} required>
+              <option value="volunteer">Volunteer</option>
+              <option value="admin">Admin</option>
+            </select>
           </p>
           <button type="submit">Submit</button>
         </form>
