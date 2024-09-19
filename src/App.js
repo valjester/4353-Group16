@@ -6,6 +6,7 @@ import Profile from './Profile';
 import Home from './Home';
 import Taskbar from './components/Taskbar';
 import EventForm from './EventForm';
+import Notifications from './notifications';
 
 function App() {
   const [formData, setFormData] = useState({
@@ -25,6 +26,7 @@ function App() {
           <Route path="/profile" element={<Profile setFormData={setFormData} />} />
           <Route path="/home" element={<Home formData={formData} />} />
           <Route path="/eventform" element={<EventForm />} />
+          <Route path="/notifications" element={<Notifications />} />
         </Routes>
       </header>
     </div>
