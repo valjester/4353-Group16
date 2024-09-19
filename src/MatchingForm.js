@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import Select from 'react-select';
+import './App.css';
 
 function MatchingForm () {
 
@@ -101,7 +102,47 @@ function MatchingForm () {
                 onChange={handleVolunteerChange}
                 options={volunteerList}
                 isSearchable
-                />
+                //Following are inline styles to make dropdown menu more readable
+                styles={{
+                  control: (base) => ({
+                    ...base,
+                    
+                    color: "white",
+                  }),
+                  menu: (base) => ({
+                    ...base,
+                    backgroundColor: "#34495e",
+                  }),
+                  option: (base, { isFocused, isSelected }) => ({
+                    ...base,
+                    backgroundColor: isSelected
+                      ? "#1abc9c"
+                      : isFocused
+                      ? "#16a085"
+                      : "#34495e",
+                    color: "white",
+                  }),
+                  multiValue: (base) => ({
+                    ...base,
+                    backgroundColor: "#003535",
+                    color: "white",
+                  }),
+                  multiValueLabel: (base) => ({
+                    ...base,
+                    color: "white",
+                  }),
+                  multiValueRemove: (base) => ({
+                    ...base,
+                    backgroundColor: "#003535",
+                    color: "white",
+                    ":hover": {
+                      backgroundColor: "#006969",
+                      color: "white",
+                    },
+                  }),
+                }}
+              />
+            
             </label>
 
             <div>

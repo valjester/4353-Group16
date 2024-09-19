@@ -39,7 +39,7 @@ label {
   font-weight: bold;
   font-size: 15px;
   font-family:'Courier New', Courier, monospace;
-  text-shadow: 2px 2px 2px black;
+  text-shadow: none;
 }
 
 input {
@@ -190,8 +190,8 @@ select {
 /* MatchingForm Styles */
 
 .matching-container {
-  width: 90%;
-  max-width: 800px;
+  width: 100%;
+  max-width: 1000px;
   margin: 50px auto;
   padding: 20px;
   background-color: #2c3e50;
