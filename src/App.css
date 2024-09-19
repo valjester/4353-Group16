@@ -230,3 +230,7 @@ select {
 .form-button:hover {
   background-color: #16a085;
 }
+
+.profile-title {
+  padding-top: 30px;
+}
