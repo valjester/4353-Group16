@@ -26,6 +26,7 @@ function App() {
           <Route path="/profile" element={<Profile setFormData={setFormData} />} />
           <Route path="/home" element={<Home formData={formData} />} />
           <Route path="/eventform" element={<EventForm />} />
+          <Route path="/matchingform" element={<MatchingForm />} />
           <Route path="/notifications" element={<Notifications />} />
         </Routes>
       </header>
