@@ -1,32 +1,71 @@
-import React from 'react'
+import React, { useState } from 'react';
+import './Modal.css';
 
-function Modal({onClose}) {
-    return (
-        <div>
-            <button onClick={onClose}>X</button>
-            <div>
-                <h1>Register</h1>
-                <form>
-                    <p>
-                        Email: <input type="email"
-                    placeholder="Enter your email"
-                    required></input>
-                    </p>
-                    <p>Password:
-                        <input type="password"
-                    placeholder="Enter your password"
-                    required></input>
-                    </p>
-                    <p>Re-enter password:
-                        <input type="password"
-                    placeholder="Enter your password"
-                    required></input>
-                    </p>
-                    <button type="submit">Submit</button>
-                </form>
-            </div>
-        </div>
-    )
+function Modal({ onClose }) {
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+
+    if (password !== confirmPassword) {
+      alert('Passwords do not match!');
+      return;
+    }
+
+    if (localStorage.getItem(email)) {
+      alert(`The email ${email} is already registered.`);
+    } else {
+      localStorage.setItem(email, JSON.stringify({ password }));
+      alert(`Registered successfully as ${email}. You may now log in.`);
+      onClose();
+    }
+  };
+
+  return (
+    <div className="modal">
+      <div className="modal-content">
+        <button className="close-button" onClick={onClose}>
+          X
+        </button>
+        <h1>Register</h1>
+        <form onSubmit={handleSubmit}>
+          <p>
+            Email:{' '}
+            <input
+              type="email"
+              placeholder="Enter your email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+            />
+          </p>
+          <p>
+            Password:{' '}
+            <input
+              type="password"
+              placeholder="Enter your password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+            />
+          </p>
+          <p>
+            Re-enter password:{' '}
+            <input
+              type="password"
+              placeholder="Re-enter your password"
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
+              required
+            />
+          </p>
+          <button type="submit">Submit</button>
+        </form>
+      </div>
+    </div>
+  );
 }
 
-export default Modal
+export default Modal;
