@@ -92,6 +92,11 @@ function Profile({ setFormData }) {
   const handleSubmit = (e) => {
     e.preventDefault();
 
+    if (zipcode.length < 5 || !/^\d+$/.test(zipcode)) {
+      alert('Please enter a valid zip code (5-9 digits).');
+      return;
+    }
+
     const profileData = {
       fullName,
       address1,
@@ -111,6 +116,17 @@ function Profile({ setFormData }) {
     // Set the form data for further processing (if needed)
     setFormData(profileData);
     navigate('/home');
+  };
+
+  const handleZipcodeChange = (e) => {
+    const value = e.target.value;
+    if (value.length <= 9) {
+      setZipcode(value);
+    } else if (value.length > 9) {
+      alert('Zip code cannot exceed 9 digits.');
+    } else if (value.length < 5 && value.length > 0) {
+      alert('Zip code must be at least 5 digits.');
+    }
   };
 
   return (
@@ -180,7 +196,7 @@ function Profile({ setFormData }) {
             <input
               type="text"
               value={zipcode}
-              onChange={(e) => setZipcode(e.target.value)}
+              onChange={handleZipcodeChange}
               maxLength="9"
               required
             />

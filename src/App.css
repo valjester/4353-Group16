@@ -248,3 +248,22 @@ select {
 .profile-title {
   padding-top: 30px;
 }
+
+/*Notifications page sections*/
+.section {
+  margin: 20px auto;
+  max-width: 800px;
+  padding: 15px;
+  border: 1px solid whitesmoke;
+  border-radius: 8px;
+  background-color: #003535;
+  box-shadow: 0 0 10px rgba(0, 255, 255, 0.7);
+}
+.section h3 {
+  margin:10px auto;
+  max-width:400px;
+  border-radius: 8px;
+  border:1px dashed whitesmoke;
+  box-shadow: 0 0 7px rgba(0, 255, 255, 0.7);
+}
+
