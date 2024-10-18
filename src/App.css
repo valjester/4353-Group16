@@ -95,6 +95,8 @@ button:hover {
   font-family:'Courier New', Courier, monospace;
   box-sizing: border-box;
   transition: border-color 0.3s;
+  text-shadow: none;
+  color: black;
 }
 input:focus {
   border-color: #53857a;
@@ -109,6 +111,7 @@ input:focus {
   font-weight: bold;
   font-size: 15px;
   font-family:'Courier New', Courier, monospace;
+  text-shadow: none;
 }
 
 select {

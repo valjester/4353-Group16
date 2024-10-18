@@ -7,50 +7,60 @@ const users = {
       address1: "123 Main St",
       city: "Houston",
       state: "TX",
-      zipCode: "77007",
-      skills: ["skill1"],
+      zipcode: "77007",
+      skills: ["dataentry"],
       preferences: "None",
       availability: ["2024-12-01T00:00:00Z"]
     }
   };
 
+  const getUserProfile = asyncHandler(async (req, res) => {
+    const userId = req.params.id;
+    const user = users[userId];
+  
+    if (!user) {
+      return res.status(404).json({ error: 'User not found.' });
+    }
+  
+    res.status(200).json({ data: user });
+  });
+
 const updateUserProfile = asyncHandler(async (req, res) => {
-    const { fullName, address1, address2, city, state, zipCode, skills, preferences, availability } = req.body;
+
+    const {id} = req.params;
+    const user = users[id];
+    if (!user){
+        return res.status(404).json({error: 'User not found.'});
+    }
+    
+    try{
+    const { fullName, address1, address2, city, state, zipcode, skills, preferences, availability } = req.body;
 
     if (!fullName || fullName.length > 50) {
-        res.status(400);
-        throw new Error('Name is required.');
+        return res.status(400).json({ error: 'Full Name must be between 1 and 50 characters.' });
     }
     if (!address1 || address1.length > 100) {
-        res.status(400);
-        throw new Error('Address 1 is required.');
+        return res.status(400).json({ error: 'Address 1 is required.' });
     }
     if (address2 && address2.length > 100) {
-        res.status(400);
-        throw new Error('Address 2 should not exceed 100 characters.');
+        return res.status(400).json({ error: 'Address 2 exceeded character limit.' });
     }
     if (!city || city.length > 100) {
-        res.status(400);
-        throw new Error('City is required.');
+        return res.status(400).json({ error: 'City required.' });
     }
     if (!state || state.length !== 2) {
-        res.status(400);
-        throw new Error('Please select your state.');
+        return res.status(400).json({ error: 'State required.' });
     }
-    if (!zipCode || zipCode.length < 5 || zipCode.length > 9 || isNaN(zipCode)) {
-        res.status(400);
-        throw new Error('Zip Code must be a number with at least 5 digits.');
+    if (!zipcode || zipcode.length < 5 || zipcode.length > 9 || isNaN(zipcode)) {
+        return res.status(400).json({ error: 'Invalid zipcode.' });
     }
     if (!skills || !Array.isArray(skills) || skills.length === 0) {
-        res.status(400);
-        throw new Error('Please select at least one skill.');
+        return res.status(400).json({ error: 'No skills selected.' });
     }
     if (!availability || !Array.isArray(availability) || availability.length === 0) {
-        res.status(400);
-        throw new Error('Please select your availability dates.');
+        return res.status(400).json({ error: 'No availability selected.' });
     }
 
-    
     const user = users[123]; 
 
     if (user) {
@@ -59,7 +69,7 @@ const updateUserProfile = asyncHandler(async (req, res) => {
       user.address2 = address2;
       user.city = city;
       user.state = state;
-      user.zipCode = zipCode;
+      user.zipcode = zipcode;
       user.skills = skills;
       user.preferences = preferences;
       user.availability = availability;
@@ -69,11 +79,37 @@ const updateUserProfile = asyncHandler(async (req, res) => {
         data: user,
       });
     } else {
-      res.status(404);
-      throw new Error('User not found');
+        return res.status(404).json({ error: 'User not found.' });
     }
+} catch (error) {
+    res.status(500).json({ error: error.message || 'Internal Server Error. Please try again.' });
+}
 });
 
 module.exports = {
+    getUserProfile,
     updateUserProfile,
 };
+
+
+
+
+  /*
+  useEffect(() => {
+    const savedProfile = JSON.parse(localStorage.getItem('userProfile'));
+    if (savedProfile) {
+      setFullName(savedProfile.fullName || '');
+      setAddress1(savedProfile.address1 || '');
+      setAddress2(savedProfile.address2 || '');
+      setCity(savedProfile.city || '');
+      setState(savedProfile.state || null);
+      setZipcode(savedProfile.zipcode || '');
+      setSkills(savedProfile.skills ? savedProfile.skills.map((skill) => ({ label: skill, value: skill })) : []);
+      setPreferences(savedProfile.preferences || '');
+      if (savedProfile.availability && savedProfile.availability.length >= 2) {
+        setStartDate(new Date(savedProfile.availability[0]));
+        setEndDate(new Date(savedProfile.availability[1]));
+      }
+    }
+  }, []);
+  */

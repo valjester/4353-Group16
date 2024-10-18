@@ -20,6 +20,7 @@ function App() {
 
   return (
     <Router>
+      <Taskbar />
     <div className="App">
       <header className="App-header">
         {isLoggedIn && <Taskbar />}

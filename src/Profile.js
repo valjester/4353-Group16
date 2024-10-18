@@ -3,6 +3,7 @@ import Select from 'react-select';
 import DatePicker from 'react-datepicker';
 import { useNavigate } from 'react-router-dom';
 import 'react-datepicker/dist/react-datepicker.css';
+import axios from 'axios';
 
 function Profile({ setFormData }) {
   const stateSelection = [
@@ -58,7 +59,7 @@ function Profile({ setFormData }) {
     {value:'WY', label:'Wyoming'}
 ];
 
-  const skillSelection = [{ value: 'skill1', label: 'Skill 1' }];
+  const skillSelection = [{value:'fundraising', label:'Fundraising'}, {value:'dataentry', label:'Data Entry'}, {value:'outreach', label:'Community Outreach'} ];
 
   const [fullName, setFullName] = useState('');
   const [address1, setAddress1] = useState('');
@@ -72,31 +73,50 @@ function Profile({ setFormData }) {
   const [endDate, setEndDate] = useState(null);
   const navigate = useNavigate();
 
-  // Load profile data from localStorage when the component mounts
   useEffect(() => {
-    const savedProfile = JSON.parse(localStorage.getItem('userProfile'));
-    if (savedProfile) {
-      setFullName(savedProfile.fullName || '');
-      setAddress1(savedProfile.address1 || '');
-      setAddress2(savedProfile.address2 || '');
-      setCity(savedProfile.city || '');
-      setState(savedProfile.state || null);
-      setZipcode(savedProfile.zipcode || '');
-      setSkills(savedProfile.skills || []);
-      setPreferences(savedProfile.preferences || '');
-      setStartDate(savedProfile.startDate ? new Date(savedProfile.startDate) : null);
-      setEndDate(savedProfile.endDate ? new Date(savedProfile.endDate) : null);
-    }
+    const fetchProfileData = async () => {
+      try {
+        const userId = 123; //Hardcoding userId for now
+        const response = await axios.get(`/api/users/${userId}`);
+        const profileData = response.data.data;
+
+        // Populate with data from backend
+        setFullName(profileData.fullName || '');
+        setAddress1(profileData.address1 || '');
+        setAddress2(profileData.address2 || '');
+        setCity(profileData.city || '');
+        setState(profileData.state || null);
+        setZipcode(profileData.zipcode || '');
+        console.log('Profile Skills:', profileData.skills);
+        setSkills(profileData.skills.map((skill) => ({
+          value: skill,
+          label: skillSelection.find(s => s.value === skill)?.label || skill
+        })));
+        setPreferences(profileData.preferences || '');
+        setStartDate(profileData.availability?.[0] ? new Date(profileData.availability[0]) : null);
+        setEndDate(profileData.availability?.[1] ? new Date(profileData.availability[1]) : null);
+      } catch (error) {
+        console.error('Error fetching profile data:', error);
+        console.error('Error fetching profile data:', error);
+        alert('There was an error fetching your profile data. Please try again later.');
+      }
+    };
+
+    fetchProfileData();
   }, []);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
+    const availability = [];
+    if (startDate) availability.push(startDate);
+    if (endDate) availability.push(endDate);
+
     if (zipcode.length < 5 || !/^\d+$/.test(zipcode)) {
-      alert('Please enter a valid zip code (5-9 digits).');
+      alert('Please enter a valid zipcode (5-9 digits)');
       return;
     }
-
+  
     const profileData = {
       fullName,
       address1,
@@ -104,18 +124,33 @@ function Profile({ setFormData }) {
       city,
       state,
       zipcode,
-      skills,
+      skills: skills.map((skill) => skill.label),
       preferences,
-      startDate: startDate ? startDate.toISOString() : null,
-      endDate: endDate ? endDate.toISOString() : null,
+      availability: availability.map((date) => date.toISOString()),
     };
-
-    // Save the profile data to localStorage
-    localStorage.setItem('userProfile', JSON.stringify(profileData));
-
-    // Set the form data for further processing (if needed)
-    setFormData(profileData);
-    navigate('/home');
+  
+    try {
+      const userId = 123; //Hardcoding userID for now
+      const response = await fetch(`/api/users/${userId}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(profileData),
+      });
+  
+      const data = await response.json();
+  
+      if (response.ok) {
+        localStorage.setItem('userProfile', JSON.stringify(data.data));
+        alert('Profile updated successfully');
+        navigate('/home');
+      } else {
+        throw new Error(data.error || 'Failed to update profile');
+      }
+    } catch (error) {
+      alert(error.message);
+    }
   };
 
   const handleZipcodeChange = (e) => {
@@ -210,6 +245,7 @@ function Profile({ setFormData }) {
               value={skills}
               onChange={(selectedOptions) => setSkills(selectedOptions)}
               options={skillSelection}
+              required
             />
           </div>
 
