@@ -14,25 +14,6 @@ const users = {
     },
 };
 
-const assignEventToUser = async (req, res) => {
-    const userId = req.params.id;
-    const { eventId } = req.body; // Assuming you're sending eventId in the body
-
-    if (!users[userId]) {
-        return res.status(404).json({ error: 'User not found.' });
-    }
-
-    users[userId].history.push(eventId);
-
-    return res.json({ message: 'Event assigned successfully', data: users[userId] });
-};
-
-module.exports = {
-    getUserProfile,
-    updateUserProfile,
-    assignEventToUser, // Export the new function
-};
-
 describe('User Controller', () => {
     describe('getUserProfile', () => {
         it('should return user data given an ID', async () => {
@@ -69,6 +50,7 @@ describe('User Controller', () => {
                     skills: ['dataentry'],
                     preferences: 'None',
                     availability: ["2024-12-01T00:00:00Z"],
+                    history: [],
                 },
             };
             const res = {json: jest.fn(), status: jest.fn().mockReturnThis()};
@@ -87,6 +69,7 @@ describe('User Controller', () => {
                     skills: ['dataentry'],
                     preferences: 'None',
                     availability: ["2024-12-01T00:00:00Z"],
+                    history: []
                 },
             });
         });
@@ -103,6 +86,7 @@ describe('User Controller', () => {
                     skills: ['outreach'],
                     preferences: 'None',
                     availability: ['2024-11-01T00:00:00Z'],
+                    history: []
                 },
             };
             const res = {json: jest.fn(), 
@@ -125,7 +109,85 @@ describe('User Controller', () => {
             await userController.updateUserProfile(req, res);
 
             expect(res.status).toHaveBeenCalledWith(400);
-            expect(res.json).toHaveBeenCalledWith({ error: 'Full Name must be between 1 and 50 characters.' }); // Expected error message
+            expect(res.json).toHaveBeenCalledWith({ error: 'Full Name must be between 1 and 50 characters.' });
+        });
+
+        it('should return 400 error, invalid input', async () => {
+            const req = {
+                params: { id: '123' },
+                body: { fullName: 'John Doe', address1: '' },
+            };
+            const res = { json: jest.fn(), status: jest.fn().mockReturnThis() };
+
+            await userController.updateUserProfile(req, res);
+
+            expect(res.status).toHaveBeenCalledWith(400);
+            expect(res.json).toHaveBeenCalledWith({ error: 'Address 1 is required.' });
+        });
+
+        it('should return 400 error, invalid input', async () => {
+            const req = {
+                params: { id: '123' },
+                body: { fullName: 'John Doe', address1: '123 Main St', address2: 'abcdef6789876ohjt86jgvnv1234567891013844938374urhfnvnffhfhfidfhjgidghighregihergierighergierhgiergwerqwert' },
+            };
+            const res = { json: jest.fn(), status: jest.fn().mockReturnThis() };
+
+            await userController.updateUserProfile(req, res);
+
+            expect(res.status).toHaveBeenCalledWith(400);
+            expect(res.json).toHaveBeenCalledWith({ error: 'Address 2 exceeded character limit.' });
+        });
+
+        it('should return 400 error, invalid input', async () => {
+            const req = {
+                params: { id: '123' },
+                body: { fullName: 'John Doe', address1: '123 Main St', city:'' },
+            };
+            const res = { json: jest.fn(), status: jest.fn().mockReturnThis() };
+
+            await userController.updateUserProfile(req, res);
+
+            expect(res.status).toHaveBeenCalledWith(400);
+            expect(res.json).toHaveBeenCalledWith({ error: 'City required.' });
+        });
+
+        it('should return 400 error, invalid input', async () => {
+            const req = {
+                params: { id: '123' },
+                body: { fullName: 'John Doe', address1: '123 Main St', city:'Houston', state:'' },
+            };
+            const res = { json: jest.fn(), status: jest.fn().mockReturnThis() };
+
+            await userController.updateUserProfile(req, res);
+
+            expect(res.status).toHaveBeenCalledWith(400);
+            expect(res.json).toHaveBeenCalledWith({ error: 'State required.' });
+        });
+
+        it('should return 400 error, invalid input', async () => {
+            const req = {
+                params: { id: '123' },
+                body: { fullName: 'John Doe', address1:'abc', city:'Austin', state:'TX', zipcode:'123' },
+            };
+            const res = { json: jest.fn(), status: jest.fn().mockReturnThis() };
+
+            await userController.updateUserProfile(req, res);
+
+            expect(res.status).toHaveBeenCalledWith(400);
+            expect(res.json).toHaveBeenCalledWith({ error: 'Invalid zipcode.' });
+        });
+
+        it('should return 400 error, invalid input', async () => {
+            const req = {
+                params: { id: '123' },
+                body: { fullName: 'John Doe', address1:'abc', city:'Austin', state:'TX', zipcode:'12345', skills: [] },
+            };
+            const res = { json: jest.fn(), status: jest.fn().mockReturnThis() };
+
+            await userController.updateUserProfile(req, res);
+
+            expect(res.status).toHaveBeenCalledWith(400);
+            expect(res.json).toHaveBeenCalledWith({ error: 'No skills selected.' });
         });
     });
 });
