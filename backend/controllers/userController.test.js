@@ -10,7 +10,27 @@ const users = {
         skills: ["dataentry"],
         preferences: "None",
         availability: ["2024-12-01T00:00:00Z"],
+        history: []
     },
+};
+
+const assignEventToUser = async (req, res) => {
+    const userId = req.params.id;
+    const { eventId } = req.body; // Assuming you're sending eventId in the body
+
+    if (!users[userId]) {
+        return res.status(404).json({ error: 'User not found.' });
+    }
+
+    users[userId].history.push(eventId);
+
+    return res.json({ message: 'Event assigned successfully', data: users[userId] });
+};
+
+module.exports = {
+    getUserProfile,
+    updateUserProfile,
+    assignEventToUser, // Export the new function
 };
 
 describe('User Controller', () => {
