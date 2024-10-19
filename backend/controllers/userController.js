@@ -10,7 +10,7 @@ const users = {
         skills: ["dataentry"],
         preferences: "None",
         availability: ["2024-12-01T00:00:00Z"],
-        history: []
+        history: [1]
     },
 };
 
