@@ -1,119 +1,112 @@
-const asyncHandler = require('express-async-handler');
+const userController = require('./userController');
 
-//Hardcoded user 123
 const users = {
     123: {
-      fullName: "John Doe",
-      address1: "123 Main St",
-      city: "Houston",
-      state: "TX",
-      zipcode: "77007",
-      skills: ["dataentry"],
-      preferences: "None",
-      availability: ["2024-12-01T00:00:00Z"]
-    }
-  };
-
-  const getUserProfile = async (req, res) => {
-    const userId = req.params.id;
-    if (!users[userId]) {
-        return res.status(404).json({ error: 'User not found.' });
-    }
-    
-    const user = users[userId];
-    const historyWithDetails = user.history.map(eventId => ({
-        ...events[eventId],
-        eventId
-    }));
-
-    return res.json({ data: { ...user, history: historyWithDetails } });
+        fullName: "John Doe",
+        address1: "123 Main St",
+        city: "Houston",
+        state: "TX",
+        zipcode: "77007",
+        skills: ["dataentry"],
+        preferences: "None",
+        availability: ["2024-12-01T00:00:00Z"],
+        history: []
+    },
 };
 
-const updateUserProfile = asyncHandler(async (req, res) => {
+describe('User Controller', () => {
+    describe('getUserProfile', () => {
+        it('should return user data given an ID', async () => {
+            const req = { params: { id: '123' } };
+            const res = { json: jest.fn(), status: jest.fn().mockReturnThis() };
 
-    const {id} = req.params;
-    const user = users[id];
-    if (!user){
-        return res.status(404).json({error: 'User not found.'});
-    }
-    
-    try{
-    const { fullName, address1, address2, city, state, zipcode, skills, preferences, availability } = req.body;
+            await userController.getUserProfile(req, res);
 
-    if (!fullName || fullName.length > 50) {
-        return res.status(400).json({ error: 'Full Name must be between 1 and 50 characters.' });
-    }
-    if (!address1 || address1.length > 100) {
-        return res.status(400).json({ error: 'Address 1 is required.' });
-    }
-    if (address2 && address2.length > 100) {
-        return res.status(400).json({ error: 'Address 2 exceeded character limit.' });
-    }
-    if (!city || city.length > 100) {
-        return res.status(400).json({ error: 'City required.' });
-    }
-    if (!state || state.length !== 2) {
-        return res.status(400).json({ error: 'State required.' });
-    }
-    if (!zipcode || zipcode.length < 5 || zipcode.length > 9 || isNaN(zipcode)) {
-        return res.status(400).json({ error: 'Invalid zipcode.' });
-    }
-    if (!skills || !Array.isArray(skills) || skills.length === 0) {
-        return res.status(400).json({ error: 'No skills selected.' });
-    }
-    if (!availability || !Array.isArray(availability) || availability.length === 0) {
-        return res.status(400).json({ error: 'No availability selected.' });
-    }
+            expect(res.json).toHaveBeenCalledWith({ data: users['123'] });
+        });
 
-    const user = users[123]; 
+        it('should return 404 error for user not found', async () => {
+            const req = { params: { id: '999' } }; //ID that doesn't exist
+            const res = { json: jest.fn(), status: jest.fn().mockReturnThis() };
 
-    if (user) {
-      user.fullName = fullName;
-      user.address1 = address1;
-      user.address2 = address2;
-      user.city = city;
-      user.state = state;
-      user.zipcode = zipcode;
-      user.skills = skills;
-      user.preferences = preferences;
-      user.availability = availability;
+            await userController.getUserProfile(req, res);
 
-      res.json({
-        message: 'Profile updated successfully',
-        data: user,
-      });
-    } else {
-        return res.status(404).json({ error: 'User not found.' });
-    }
-} catch (error) {
-    res.status(500).json({ error: error.message || 'Internal Server Error. Please try again.' });
-}
+            expect(res.status).toHaveBeenCalledWith(404);
+            expect(res.json).toHaveBeenCalledWith({ error: 'User not found.' });
+        });
+    });
+
+    describe('updateUserProfile', () => {
+        it('should update user profile successfully', async () => {
+            const req = {
+                params: {id:'123'},
+                body: {
+                    fullName: 'Jane Doe',
+                    address1: '456 Main St',
+                    address2: '',
+                    city: 'Austin',
+                    state: 'TX',
+                    zipcode: '78701',
+                    skills: ['dataentry'],
+                    preferences: 'None',
+                    availability: ["2024-12-01T00:00:00Z"],
+                },
+            };
+            const res = {json: jest.fn(), status: jest.fn().mockReturnThis()};
+
+            await userController.updateUserProfile(req, res);
+
+            expect(res.json).toHaveBeenCalledWith({
+                message: 'Profile updated successfully',
+                data: {
+                    fullName: 'Jane Doe',
+                    address1: '456 Main St',
+                    address2: '',
+                    city: 'Austin',
+                    state: 'TX',
+                    zipcode: '78701',
+                    skills: ['dataentry'],
+                    preferences: 'None',
+                    availability: ["2024-12-01T00:00:00Z"],
+                },
+            });
+        });
+
+        it('should return 404 error for user not found during update', async () => {
+            const req = {
+                params: { id: '999' },
+                body: {
+                    fullName: 'Random',
+                    address1: 'Anywhere',
+                    city: 'Houston',
+                    state: 'TX',
+                    zipcode: '12345',
+                    skills: ['outreach'],
+                    preferences: 'None',
+                    availability: ['2024-11-01T00:00:00Z'],
+                },
+            };
+            const res = {json: jest.fn(), 
+                        status: jest.fn().mockReturnThis()
+                        };
+
+            await userController.updateUserProfile(req, res);
+
+            expect(res.status).toHaveBeenCalledWith(404);
+            expect(res.json).toHaveBeenCalledWith({ error: 'User not found.' });
+        });
+        
+        it('should return 400 error, invalid input', async () => {
+            const req = {
+                params: { id: '123' },
+                body: { fullName: '', address1: '' },
+            };
+            const res = { json: jest.fn(), status: jest.fn().mockReturnThis() };
+
+            await userController.updateUserProfile(req, res);
+
+            expect(res.status).toHaveBeenCalledWith(400);
+            expect(res.json).toHaveBeenCalledWith({ error: 'Full Name must be between 1 and 50 characters.' }); // Expected error message
+        });
+    });
 });
-
-module.exports = {
-    getUserProfile,
-    updateUserProfile,
-};
-
-
-
-
-  /*
-  useEffect(() => {
-    const savedProfile = JSON.parse(localStorage.getItem('userProfile'));
-    if (savedProfile) {
-      setFullName(savedProfile.fullName || '');
-      setAddress1(savedProfile.address1 || '');
-      setAddress2(savedProfile.address2 || '');
-      setCity(savedProfile.city || '');
-      setState(savedProfile.state || null);
-      setZipcode(savedProfile.zipcode || '');
-      setSkills(savedProfile.skills ? savedProfile.skills.map((skill) => ({ label: skill, value: skill })) : []);
-      setPreferences(savedProfile.preferences || '');
-      if (savedProfile.availability && savedProfile.availability.length >= 2) {
-        setStartDate(new Date(savedProfile.availability[0]));
-        setEndDate(new Date(savedProfile.availability[1]));
-      }
-    }
-  }, []);
-  */

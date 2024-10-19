@@ -16,33 +16,27 @@ function App() {
     fullname: ""
   });
 
-  const [isLoggedIn, setIsLoggedIn] = useState(false); // Initialize login status to false
-  const [userId, setUserId] = useState(null); // Initialize user ID
-
-  const handleLogin = (user) => {
-    setIsLoggedIn(true);
-    setUserId(user.id); // Assuming user object has an id property
-    setFormData({ fullname: user.fullname }); // Assuming user object has a fullname property
-  };
+  const[isLoggedIn, setIsLoggedIn] = useState(false); //Initialize login status to false
 
   return (
     <Router>
-      <div className="App">
-        <header className="App-header">
-          {isLoggedIn && <Taskbar />}
-          <Routes>
-            <Route path="/" element={<Navigate to="/login" />} />
-            <Route path="/login" element={<Login onLogin={handleLogin} />} />
-            <Route path="/profile" element={<Profile setFormData={setFormData} />} />
-            <Route path="/home" element={<Home formData={formData} />} />
-            <Route path="/admin" element={<Admin />} />
-            <Route path="/eventform" element={<EventForm />} />
-            <Route path="/matchingform" element={<MatchingForm />} />
-            <Route path="/notifications" element={<Notifications />} />
-            <Route path="/history" element={<History userId={userId} />} /> {/* Pass userId to History */}
-          </Routes>
-        </header>
-      </div>
+      <Taskbar />
+    <div className="App">
+      <header className="App-header">
+        {isLoggedIn && <Taskbar />}
+        <Routes>
+          <Route path="/" element={<Navigate to="/login" />} />
+          <Route path="/login" element={<Login onLogin={() => setIsLoggedIn(true)} />} />
+          <Route path="/profile" element={<Profile setFormData={setFormData} />} />
+          <Route path="/home" element={<Home formData={formData} />} />
+          <Route path="/admin" element={<Admin />} />
+          <Route path="/eventform" element={<EventForm />} />
+          <Route path="/matchingform" element={<MatchingForm />} />
+          <Route path="/notifications" element={<Notifications />} />
+          <Route path="/history" element={<History />} />
+        </Routes>
+      </header>
+    </div>
     </Router>
   );
 }
