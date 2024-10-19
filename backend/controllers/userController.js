@@ -9,7 +9,8 @@ const users = {
       zipcode: "77007",
       skills: ["dataentry"],
       preferences: "None",
-      availability: ["2024-12-01T00:00:00Z"]
+      availability: ["2024-12-01T00:00:00Z"],
+      history: [1]
     }
   };
 
