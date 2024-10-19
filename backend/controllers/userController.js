@@ -14,16 +14,20 @@ const users = {
     }
   };
 
-  const getUserProfile = asyncHandler(async (req, res) => {
+  const getUserProfile = async (req, res) => {
     const userId = req.params.id;
-    const user = users[userId];
-  
-    if (!user) {
-      return res.status(404).json({ error: 'User not found.' });
+    if (!users[userId]) {
+        return res.status(404).json({ error: 'User not found.' });
     }
-  
-    res.status(200).json({ data: user });
-  });
+    
+    const user = users[userId];
+    const historyWithDetails = user.history.map(eventId => ({
+        ...events[eventId],
+        eventId
+    }));
+
+    return res.json({ data: { ...user, history: historyWithDetails } });
+};
 
 const updateUserProfile = asyncHandler(async (req, res) => {
 
