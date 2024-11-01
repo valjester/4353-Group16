@@ -1,7 +1,16 @@
 const express = require('express');
 const app = express();
 const PORT = process.env.PORT || 4000;
+const mongoose = require('mongoose')
+const MONGO_UI = "CHANGE THIS BEFORE WORKING";
 
+mongoose.connect(MONGO_UI)
+  .then(() => {
+    console.log("Connected to DB");
+  })
+  .catch((error) => {
+    console.log(error);
+  })
 app.use(express.json());
 
 const userRoutes = require('./routes/userRoutes');

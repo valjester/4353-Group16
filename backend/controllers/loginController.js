@@ -18,7 +18,7 @@ const registerUser = asyncHandler(async (req, res) => {
   }
 
   // Check if user already exists
-  const userExists = users.find(user => user.email === email);
+  const userExists = await User.findOne({ email });
   if (userExists) {
     return res.status(400).json({ error: 'User already exists' });
   }
@@ -26,19 +26,20 @@ const registerUser = asyncHandler(async (req, res) => {
   // Hash the password
   const hashedPassword = await bcrypt.hash(password, 10);
 
-  // Create new user object
-  const newUser = {
-    id: users.length + 1,  // Unique user ID
+  // Create new user
+  const newUser = new User({
     email,
     password: hashedPassword,
-    role
-  };
+    role,
+    // Add any other fields you want to set initially
+  });
 
-  // Add user to the users array
-  users.push(newUser);
+  // Save user to the database
+  await newUser.save();
 
   res.status(201).json({ message: 'Registration successful. You can now log in.' });
 });
+
 
 // Login handler
 const loginUser = asyncHandler(async (req, res) => {

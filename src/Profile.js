@@ -6,6 +6,12 @@ import 'react-datepicker/dist/react-datepicker.css';
 import axios from 'axios';
 
 function Profile({ setFormData }) {
+  const skillSelection = [
+    { value: 'fundraising', label: 'Fundraising' },
+    { value: 'dataentry', label: 'Data Entry' },
+    { value: 'outreach', label: 'Community Outreach' }
+  ];
+
   const stateSelection = [
     {value:'AL', label:'Alabama'},
     {value:'AK', label:'Alaska'},
@@ -58,9 +64,6 @@ function Profile({ setFormData }) {
     {value:'WI', label:'Wisconsin'},
     {value:'WY', label:'Wyoming'}
 ];
-
-  const skillSelection = [{value:'fundraising', label:'Fundraising'}, {value:'dataentry', label:'Data Entry'}, {value:'outreach', label:'Community Outreach'} ];
-
   const [fullName, setFullName] = useState('');
   const [address1, setAddress1] = useState('');
   const [address2, setAddress2] = useState('');
@@ -113,45 +116,45 @@ function Profile({ setFormData }) {
     if (endDate) availability.push(endDate);
 
     if (zipcode.length < 5 || !/^\d+$/.test(zipcode)) {
-      alert('Please enter a valid zipcode (5-9 digits)');
-      return;
+        alert('Please enter a valid zipcode (5-9 digits)');
+        return;
     }
-  
+
     const profileData = {
-      fullName,
-      address1,
-      address2,
-      city,
-      state,
-      zipcode,
-      skills: skills.map((skill) => skill.label),
-      preferences,
-      availability: availability.map((date) => date.toISOString()),
+        fullName,
+        address1,
+        address2,
+        city,
+        state,
+        zipcode,
+        skills: skills.map((skill) => skill.value), // Use skill.value instead of skill.label
+        preferences,
+        availability: availability.map((date) => date.toISOString()),
     };
-  
+
     try {
-      const userId = 123; //Hardcoding userID for now
-      const response = await fetch(`/api/users/${userId}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(profileData),
-      });
-  
-      const data = await response.json();
-  
-      if (response.ok) {
-        localStorage.setItem('userProfile', JSON.stringify(data.data));
-        alert('Profile updated successfully');
-        navigate('/home');
-      } else {
-        throw new Error(data.error || 'Failed to update profile');
-      }
+        const userId = localStorage.getItem('userId'); // Fetch user ID from local storage
+        const response = await fetch(`/api/users/${userId}`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(profileData), // Make sure this is a valid JSON string
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+            alert('Profile updated successfully');
+            navigate('/home');
+        } else {
+            throw new Error(data.error || 'Failed to update profile');
+        }
     } catch (error) {
-      alert(error.message);
+        alert(error.message);
     }
-  };
+};
+
 
   const handleZipcodeChange = (e) => {
     const value = e.target.value;

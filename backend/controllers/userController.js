@@ -1,35 +1,58 @@
+const User = require('../models/User');
 const asyncHandler = require('express-async-handler');
+const mongoose = require('mongoose')
+// Controller to create a new user
+const createUser = asyncHandler(async (req, res) => {
+  const { fullName, address1, address2, city, state, zipcode, skills, preferences, availability } = req.body;
 
-const users = {
-    123: {
-      fullName: "John Doe",
-      address1: "123 Main St",
-      city: "Houston",
-      state: "TX",
-      zipcode: "77007",
-      skills: ["dataentry"],
-      preferences: "None",
-      availability: ["2024-12-01T00:00:00Z"],
-      history: [1]
-    }
-  };
+  // Basic validation to ensure required fields are provided
+  if (!fullName || !address1 || !city || !state || !zipcode || !skills || !availability) {
+    return res.status(400).json({ error: 'All required fields must be filled out.' });
+  }
 
-  const assignEventToUser = async (req, res) => {
+  try {
+    // Create a new user instance
+    const user = new User({
+      fullName,
+      address1,
+      address2,
+      city,
+      state,
+      zipcode,
+      skills,
+      preferences,
+      availability,
+      history: []  // Initializes an empty event history
+    });
+
+    // Save the new user to the database
+    await user.save();
+
+    res.status(201).json({ message: 'User registered successfully', data: user });
+  } catch (error) {
+    res.status(500).json({ error: error.message || 'Internal Server Error' });
+  }
+});
+
+const assignEventToUser = asyncHandler(async (req, res) => {
+  const userId = req.params.id;
+  const { eventId } = req.body;
+
+  const user = await User.findById(userId);
+
+  if (!user) {
+    return res.status(404).json({ error: 'User not found.' });
+  }
+
+  user.history.push(eventId);
+  await user.save();
+
+  res.json({ message: 'Event assigned successfully', data: user });
+});
+
+const getUserProfile = (async (req, res) => {
     const userId = req.params.id;
-    const { eventId } = req.body; // Assuming you're sending eventId in the body
-
-    if (!users[userId]) {
-        return res.status(404).json({ error: 'User not found.' });
-    }
-
-    users[userId].history.push(eventId);
-
-    return res.json({ message: 'Event assigned successfully', data: users[userId] });
-};
-
-  const getUserProfile = asyncHandler(async (req, res) => {
-    const userId = req.params.id;
-    const user = users[userId];
+    const user = await User.findById(userId);
   
     if (!user) {
       return res.status(404).json({ error: 'User not found.' });
@@ -37,70 +60,38 @@ const users = {
   
     res.status(200).json({ data: user });
   });
-
-const updateUserProfile = asyncHandler(async (req, res) => {
-
-    const {id} = req.params;
-    const user = users[id];
-    if (!user){
-        return res.status(404).json({error: 'User not found.'});
+  const updateUserProfile = asyncHandler(async (req, res) => {
+    const { id } = req.params;
+  
+    // Validate the ID format before querying
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({ error: 'Invalid user ID format.' });
     }
-    
-    try{
-    const { fullName, address1, address2, city, state, zipcode, skills, preferences, availability } = req.body;
-
-    if (!fullName || fullName.length > 50) {
-        return res.status(400).json({ error: 'Full Name must be between 1 and 50 characters.' });
-    }
-    if (!address1 || address1.length > 100) {
-        return res.status(400).json({ error: 'Address 1 is required.' });
-    }
-    if (address2 && address2.length > 100) {
-        return res.status(400).json({ error: 'Address 2 exceeded character limit.' });
-    }
-    if (!city || city.length > 100) {
-        return res.status(400).json({ error: 'City required.' });
-    }
-    if (!state || state.length !== 2) {
-        return res.status(400).json({ error: 'State required.' });
-    }
-    if (!zipcode || zipcode.length < 5 || zipcode.length > 9 || isNaN(zipcode)) {
-        return res.status(400).json({ error: 'Invalid zipcode.' });
-    }
-    if (!skills || !Array.isArray(skills) || skills.length === 0) {
-        return res.status(400).json({ error: 'No skills selected.' });
-    }
-    if (!availability || !Array.isArray(availability) || availability.length === 0) {
-        return res.status(400).json({ error: 'No availability selected.' });
-    }
-
-    const user = users[123]; 
-
-    if (user) {
-      user.fullName = fullName;
-      user.address1 = address1;
-      user.address2 = address2;
-      user.city = city;
-      user.state = state;
-      user.zipcode = zipcode;
-      user.skills = skills;
-      user.preferences = preferences;
-      user.availability = availability;
-
-      res.json({
-        message: 'Profile updated successfully',
-        data: user,
-      });
-    } else {
+  
+    const updates = req.body; // Get the updated data from the request body
+  
+    try {
+      const updatedUser = await User.findByIdAndUpdate(
+        id,
+        updates,
+        { new: true, runValidators: true } // Return the updated user and run validators
+      );
+  
+      if (!updatedUser) {
         return res.status(404).json({ error: 'User not found.' });
+      }
+  
+      res.json({ message: 'Profile updated successfully', data: updatedUser });
+    } catch (error) {
+      res.status(500).json({ error: error.message || 'Internal Server Error. Please try again.' });
     }
-} catch (error) {
-    res.status(500).json({ error: error.message || 'Internal Server Error. Please try again.' });
-}
-});
+  });
+  
 
-module.exports = {
+  module.exports = {
+    createUser,
     getUserProfile,
     updateUserProfile,
-    assignEventToUser,
-};
+    assignEventToUser
+  };
+  
