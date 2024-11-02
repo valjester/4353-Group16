@@ -1,9 +1,7 @@
 const asyncHandler = require('express-async-handler');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-
-// Hardcoded users for now (replace with database logic later)
-let users = [];
+const User = require('../models/User');
 
 // Registration handler
 const registerUser = asyncHandler(async (req, res) => {
@@ -31,12 +29,10 @@ const registerUser = asyncHandler(async (req, res) => {
     email,
     password: hashedPassword,
     role,
-    // Add any other fields you want to set initially
   });
 
   // Save user to the database
   await newUser.save();
-
   res.status(201).json({ message: 'Registration successful. You can now log in.' });
 });
 
@@ -45,14 +41,12 @@ const registerUser = asyncHandler(async (req, res) => {
 const loginUser = asyncHandler(async (req, res) => {
   const { email, password } = req.body;
 
-  // Find user by email
-  const user = users.find(u => u.email === email);
+  const user = await User.findOne({ email });
 
   if (!user) {
     return res.status(400).json({ error: 'Invalid credentials' });
   }
 
-  // Compare passwords
   const isPasswordCorrect = await bcrypt.compare(password, user.password);
   if (!isPasswordCorrect) {
     return res.status(400).json({ error: 'Invalid credentials' });

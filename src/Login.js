@@ -10,26 +10,34 @@ function Login({ onLogin }) {
   const navigate = useNavigate();
 
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault(); // Prevent page reload
-    const user = JSON.parse(localStorage.getItem(username));
-    if (user && user.password === password) {
-      alert(`Logged in as ${username}`);
-      onLogin();
-
-      // Check if profile data exists
-      const profileData = JSON.parse(localStorage.getItem('userProfile'));
-
-      // Conditional routing based on the existence of profile data
-      if (profileData) {
-        navigate('/home', { state: { name: profileData.fullName } });
+    
+    try {
+      const response = await fetch('/api/users/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: username, password }),
+      });
+      
+      const data = await response.json();
+      
+      if (response.ok) {
+        // Store the token in localStorage
+        localStorage.setItem('token', data.token);
+        alert(`Logged in as ${username}`);
+        onLogin();
+  
+        navigate('/home');
       } else {
-        navigate('/profile');
+        alert(data.error);
       }
-    } else {
-      alert('Invalid credentials.');
+    } catch (error) {
+      console.error('Login failed:', error);
+      alert('Login failed. Please try again.');
     }
   };
+  
 
   const openModal = () => setIsModalOpen(true);
   const closeModal = () => setIsModalOpen(false);
