@@ -131,10 +131,13 @@ function Profile({ setFormData }) {
         preferences,
         availability: availability.map((date) => date.toISOString()),
     };
+    
+    console.log("Profile Data JSON Output:", JSON.stringify(profileData, null, 2));
+
 
     try {
         const userId = localStorage.getItem('userId'); // Fetch user ID from local storage
-        const response = await fetch(`/api/users/${userId}`, {
+        const response = await fetch(`/api/users/${userId}/profile`, {
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json',

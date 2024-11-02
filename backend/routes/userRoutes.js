@@ -6,7 +6,7 @@ const { registerUser, loginUser } = require('../controllers/loginController');
 router.get('/:id', userController.getUserProfile);
 
 // update a user's profile by ID
-router.put('/:id', userController.updateUserProfile);
+router.put('/:id/profile', userController.updateUserProfile);
 
 // create a new user
 router.post('/register', registerUser);

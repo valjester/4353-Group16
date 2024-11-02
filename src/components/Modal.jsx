@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import axios from 'axios'; // Make sure to install axios
 import './Modal.css';
 
 function Modal({ onClose }) {
@@ -7,7 +8,7 @@ function Modal({ onClose }) {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [role, setRole] = useState('volunteer');
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
     if (password !== confirmPassword) {
@@ -15,13 +16,26 @@ function Modal({ onClose }) {
       return;
     }
 
-    if (localStorage.getItem(email)) {
-      alert(`The email ${email} is already registered.`);
-    } 
-    else {
-      localStorage.setItem(email, JSON.stringify({ password }));
-      alert(`Registered successfully as ${email}. You may now log in.`);
-      onClose();
+    try {
+      const response = await axios.post('/api/users/register', {
+        email,
+        password,
+        role,
+      });
+
+      if (response.status === 201) {
+        const userId = response.data.data._id;
+        console.log("MAYBE ID?", userId);
+        localStorage.setItem('userId', userId); // Store user ID in localStorage
+        alert(`Registered successfully as ${email}. You may now log in.`);
+        onClose();
+      } else {
+        alert('Registration failed. Please try again.');
+      }
+    } catch (error) {
+      console.error('Registration error:', error);
+      const errorMessage = error.response?.data?.error || 'An error occurred during registration.';
+      alert(errorMessage);
     }
   };
 
