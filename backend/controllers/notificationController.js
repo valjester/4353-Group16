@@ -1,12 +1,11 @@
 const asyncHandler = require('express-async-handler');
 //const { getUserProfile } = require('./userController');
 const { getAllEvents } = require('./eventController');
-const users = require('./userController');
+const User = require('../models/User');
 
 const getFutureUserEvents = asyncHandler(async (req, res) => {
-    //const userID = req.params.id;
-    //const user = users[userID];
-    const user = users[123];    //use the hardcoded user 123
+    const userID = req.params.id;
+    const user = await User.findById(userID);
 
     if(!user) {
         return res.status(404).json({ error: 'User not found.' });
@@ -17,7 +16,6 @@ const getFutureUserEvents = asyncHandler(async (req, res) => {
     }
 
     const currentDate = new Date();
-
     const allEvents = await getAllEvents();
 
     const futureEvents = allEvents
@@ -32,9 +30,8 @@ const getFutureUserEvents = asyncHandler(async (req, res) => {
 })
 
 const getUpcomingUserEvents = asyncHandler(async (req, res) => {
-    //const userID = req.params.id;
-    //const user = users[userID];
-    const user = users[123];    //use the hardcoded user 123
+    const userID = req.params.id;
+    const user = await User.findById(userID);
 
     if(!user) {
         return res.status(404).json({ error: 'User not found.' });
