@@ -2,7 +2,9 @@ const express = require('express');
 const app = express();
 const PORT = process.env.PORT || 4000;
 const mongoose = require('mongoose')
-const MONGO_UI = "CHANGE THIS BEFORE WORKING";
+const MONGO_UI = "redacted";
+require('dotenv').config();
+
 
 mongoose.connect(MONGO_UI)
   .then(() => {

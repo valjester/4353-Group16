@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import axios from 'axios'; // Import axios to make API requests
 import Modal from './components/Modal';
 import './App.css';
 
@@ -9,32 +10,32 @@ function Login({ onLogin }) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const navigate = useNavigate();
 
-
   const handleSubmit = async (e) => {
     e.preventDefault(); // Prevent page reload
     
     try {
-      const response = await fetch('/api/users/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: username, password }),
+      const response = await axios.post('/api/users/login', {
+        email: username,
+        password,
       });
-      
-      const data = await response.json();
-      
-      if (response.ok) {
-        // Store the token in localStorage
-        localStorage.setItem('token', data.token);
+
+      if (response.status === 200) {
+        const userId = response.data.userId;
+        localStorage.setItem('userId', userId);
         alert(`Logged in as ${username}`);
         onLogin();
-  
-        navigate('/home');
-      } else {
-        alert(data.error);
+
+        // Check if profile data exists
+        const profileData = response.data.profileData;
+        if (profileData) {
+          navigate('/home', { state: { name: profileData.fullName } });
+        } else {
+          navigate('/profile');
+        }
       }
     } catch (error) {
-      console.error('Login failed:', error);
-      alert('Login failed. Please try again.');
+      console.error('Login error:', error);
+      alert(error.response?.data?.error || 'Invalid credentials.');
     }
   };
   
@@ -68,12 +69,12 @@ function Login({ onLogin }) {
       </form>
 
       <div>
-      <button type="button" onClick={openModal}>
+        <button type="button" onClick={openModal}>
           Click Here to Register
         </button>
-        </div>
+      </div>
       {isModalOpen && <Modal onClose={closeModal} />}
-</div>
+    </div>
   );
 }
 
