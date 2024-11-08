@@ -20,8 +20,9 @@ function Login({ onLogin }) {
       });
 
       if (response.status === 200) {
-        const userId = response.data.userId;
-        localStorage.setItem('userId', userId);
+        const { userId, token } = response.data;
+        localStorage.setItem('token', response.data.token);
+        localStorage.setItem('userProfile', JSON.stringify(response.data)); /** */
         alert(`Logged in as ${username}`);
         onLogin();
 

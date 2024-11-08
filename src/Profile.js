@@ -79,8 +79,21 @@ function Profile({ setFormData }) {
   useEffect(() => {
     const fetchProfileData = async () => {
       try {
-        const userId = 123; //Hardcoding userId for now
-        const response = await axios.get(`/api/users/${userId}`);
+
+        const token = localStorage.getItem('token');
+        if (!token) {
+          alert('User is not logged in');
+          navigate('/login');
+          return;
+        }
+
+        const response = await axios.get(`/api/users/profile`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        console.log(response.data)
         const profileData = response.data.data;
 
         // Populate with data from backend
@@ -100,13 +113,19 @@ function Profile({ setFormData }) {
         setEndDate(profileData.availability?.[1] ? new Date(profileData.availability[1]) : null);
       } catch (error) {
         console.error('Error fetching profile data:', error);
-        console.error('Error fetching profile data:', error);
-        alert('There was an error fetching your profile data. Please try again later.');
+        if (error.response && (error.response.status === 401 || error.response.status === 403)) {
+          alert('Session expired. Please log in again.');
+          localStorage.removeItem('token');
+          localStorage.removeItem('userProfile');
+          navigate('/login');
+        } else {
+          alert('There was an error fetching your profile data. Please try again later.');
+        }
       }
     };
 
     fetchProfileData();
-  }, []);
+  }, [navigate]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -136,11 +155,13 @@ function Profile({ setFormData }) {
 
 
     try {
-        const userId = localStorage.getItem('userId'); // Fetch user ID from local storage
-        const response = await fetch(`/api/users/${userId}/profile`, {
+        const token = localStorage.getItem('token');
+
+        const response = await fetch(`/api/users/profile`, {
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`,
             },
             body: JSON.stringify(profileData), // Make sure this is a valid JSON string
         });
@@ -154,6 +175,7 @@ function Profile({ setFormData }) {
             throw new Error(data.error || 'Failed to update profile');
         }
     } catch (error) {
+        console.error('Error updating profile:', error);
         alert(error.message);
     }
 };
