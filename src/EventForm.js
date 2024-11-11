@@ -2,20 +2,21 @@ import Select from 'react-select';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import React, { useState } from 'react';
+import axios from 'axios';
 
 function EventForm() {
     const [eventName, setEventName] = useState('');
-    const [eventDescription, setEventDescription] = useState('');
+    const [description, setDescription] = useState('');
     const [location, setLocation] = useState('');
-    const [requiredSkills, setRequiredSkills] = useState([]);
+    const [reqSkills, setReqSkills] = useState([]);
     const [urgency, setUrgency] = useState('');
-    const [eventDate, setEventDate] = useState(null);
+    const [eventDate, setEventDate] = useState('');
 
     const skillOptions = [
-        { value: 'skill1', label: 'Skill 1' },
-        { value: 'skill2', label: 'Skill 2' },
-        { value: 'skill3', label: 'Skill 3' }
-    ];
+        { value: 'fundraising', label: 'Fundraising' },
+        { value: 'dataentry', label: 'Data Entry' },
+        { value: 'outreach', label: 'Community Outreach' }
+      ];
 
     const urgencyOptions = [
         { value: 'high', label: 'High' },
@@ -26,42 +27,40 @@ function EventForm() {
     const handleSubmit = async (e) => {
         e.preventDefault();
 
+        if (!urgency || !eventDate) {
+            alert('Please fill out all required fields.');
+            return;
+        }
+
         const eventData = {
             eventName,
-            eventDescription,
+            description,
             location,
-            requiredSkills: requiredSkills.map(skill => skill.value), // Convert to array of skill values
+            reqSkills: reqSkills.map(skill => skill.value), // Convert to array of skill values
             urgency: urgency.value, // Get the value from the selected urgency option
             eventDate: eventDate.toISOString(), // Convert date to ISO string
         };
+        console.log(eventData);
 
         try {
-            const response = await fetch('/api/events', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(eventData),
-            });
+            const response = await axios.post('/api/events', eventData);
 
-            if (response.ok) {
-                const result = await response.json();
-                console.log('Event created:', result);
+            if (response.status === 201) {
+                console.log('Event created:', response.data);
+                alert('Event created successfully!');
                 // Reset form or show success message if needed
                 setEventName('');
-                setEventDescription('');
+                setDescription('');
                 setLocation('');
-                setRequiredSkills([]);
+                setReqSkills([]);
                 setUrgency('');
                 setEventDate(null);
             } else {
-                const errorData = await response.json();
-                console.error('Error creating event:', errorData);
-                // Handle error, show message to user
+                console.error('Error creating event:', response.data);
+                alert('Failed to create event. Please try again.');
             }
         } catch (error) {
             console.error('Error submitting form:', error);
-            // Handle error, show message to user
         }
     };
 
@@ -84,8 +83,8 @@ function EventForm() {
                 <div className="form-group">
                     <label>Event Description</label>
                     <textarea
-                        value={eventDescription}
-                        onChange={(e) => setEventDescription(e.target.value)}
+                        value={description}
+                        onChange={(e) => setDescription(e.target.value)}
                         required
                         className="form-input"
                     />
@@ -105,8 +104,8 @@ function EventForm() {
                     <label>Required Skills</label>
                     <Select
                         isMulti
-                        value={requiredSkills}
-                        onChange={(selectedOptions) => setRequiredSkills(selectedOptions)}
+                        value={reqSkills}
+                        onChange={(selectedOptions) => setReqSkills(selectedOptions)}
                         options={skillOptions}
                         required
                         className="form-select"

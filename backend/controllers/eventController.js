@@ -1,50 +1,58 @@
-// controllers/eventController.js
+// backend/controllers/eventController.js
 
-// In-memory storage for events
-let savedEvents = [
-    {
-        id: 1,
-        eventName: 'Community Cleanup',
-        eventDescription: 'Join us for a day of cleaning up the local park!',
-        location: 'Central Park',
-        requiredSkills: ['teamwork', 'communication'],
-        urgency: 'high',
-        eventDate: '2024-10-25', 
+const Event = require('../models/Event');
+
+
+
+const getAllEvents = async (req, res) => {
+    try {
+        const events = await Event.find();
+        res.status(200).json(events);
+    } catch (error) {
+        console.error('Error fetching events:', error);
+        res.status(500).json({ error: 'Server error'});
     }
-];
-
-const getAllEvents = (req, res) => {
-    res.json(savedEvents);
 };
 
-const addEvent = (req, res) => {
-    const { eventName, eventDescription, location, requiredSkills, urgency, eventDate } = req.body;
+const createEvent = async (req, res) => {
+    console.log(req.body);
+    const { eventName, description, location, reqSkills, urgency, eventDate } = req.body;
 
-    if (!eventName || !eventDescription || !location || !requiredSkills || !urgency || !eventDate) {
+    if (!eventName || !description || !location || !reqSkills || !urgency || !eventDate) {
         return res.status(400).json({ error: 'All fields are required' });
     }
 
-    const newEvent = {
-        id: savedEvents.length + 1, // Generate ID
-        eventName,
-        eventDescription,
-        location,
-        requiredSkills,
-        urgency,
-        eventDate,
-    };
+    try {
+        const newEvent = new Event({
+            eventName,
+            description,
+            location,
+            reqSkills,
+            urgency,
+            eventDate: new Date(eventDate),
+        });
 
-    savedEvents.push(newEvent);
-    
-    res.status(201).json(newEvent);
+        const savedEvent = await newEvent.save();
+        res.status(201).json(savedEvent);
+    } catch (error) {
+        console.error('Error creating event: ', error);
+        res.status(500).json({ error: 'Server error' });
+    }
 };
 
-const getSavedEvents = (req, res) => {
-    res.json(savedEvents); 
+
+const getSavedEvents = async (req, res) => {
+    try {
+        const events = await Event.find();
+        res.status(200).json(events);
+    } catch (error) {
+        console.error('Error fetching events:', error);
+        res.status(500).json({ error: 'Server error' });
+    }
 };
 
 module.exports = {
     getAllEvents,
-    addEvent,
+    createEvent,
     getSavedEvents,
 };
