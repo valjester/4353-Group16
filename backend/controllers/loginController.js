@@ -75,6 +75,7 @@ const loginUser = asyncHandler(async (req, res) => {
     res.status(200).json({
       message: 'Login successful',
       userId: user._id,
+      userProfile: user,
       token,
     });
   } catch (error) {

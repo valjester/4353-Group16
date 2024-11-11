@@ -2,7 +2,7 @@ const express = require('express');
 const app = express();
 const PORT = process.env.PORT || 4000;
 const mongoose = require('mongoose')
-const MONGO_UI = "redacted";
+const MONGO_UI = "mongodb+srv://test:uCuQN2X73fhpykR5@cluster0.yyxkn.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0";
 require('dotenv').config();
 
 

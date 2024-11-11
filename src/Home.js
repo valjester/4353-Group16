@@ -3,9 +3,10 @@ import { useNavigate } from 'react-router-dom';
 
 const Home = ({ formData }) => {
   const navigate = useNavigate();
-  const profileData = JSON.parse(localStorage.getItem('userProfile'));
-  const name = profileData ? profileData.fullName : 'Guest';
+  const fullName = localStorage.getItem('fullName');
+  const name = fullName ? fullName.fullName : 'Guest';
 
+  console.log("Full name:", fullName);
   // Handle logout function
   const handleLogout = () => {
     localStorage.removeItem('token');
@@ -16,7 +17,7 @@ const Home = ({ formData }) => {
   return (
     <div>
       <h2>Home</h2>
-      <p>Welcome, {name}!</p>
+      <p>Welcome, {fullName}!</p>
       <p>Current assigned events will be viewable here</p>
       <button onClick={handleLogout}>Logout</button>
     </div>
