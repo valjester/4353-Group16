@@ -2,7 +2,7 @@ const User = require('../models/User');
 const asyncHandler = require('express-async-handler');
 const mongoose = require('mongoose')
 
-const createUser = asyncHandler(async (req, res) => {
+/*const createUser = asyncHandler(async (req, res) => {
   const { email, password } = req.body;
 
   if (!email || !password) {
@@ -23,7 +23,7 @@ const createUser = asyncHandler(async (req, res) => {
 
     await user.save();
 
-
+    console.log("Registered from userController.js"); //
     res.status(201).json({
       message: 'User registered successfully',
       data: {
@@ -36,7 +36,7 @@ const createUser = asyncHandler(async (req, res) => {
     }
     res.status(500).json({ error: error.message || 'Internal Server Error' });
   }
-});
+});*/
 
 
 
@@ -104,7 +104,7 @@ const updateUserProfile = async (req, res) => {
 };
 
   module.exports = {
-    createUser,
+    //createUser,
     getUserProfile,
     updateUserProfile,
     assignEventToUser

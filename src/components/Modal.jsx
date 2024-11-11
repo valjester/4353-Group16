@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import axios from 'axios'; // Make sure to install axios
+import axios from 'axios'; //Make sure to install axios
 import './Modal.css';
 
 function Modal({ onClose }) {
@@ -26,7 +26,7 @@ function Modal({ onClose }) {
       if (response.status === 201) {
         const userId = response.data.data._id;
         console.log("MAYBE ID?", userId);
-        localStorage.setItem('userId', userId); // Store user ID in localStorage
+        localStorage.setItem('userId', userId); //Store user ID in localStorage
         alert(`Registered successfully as ${email}. You may now log in.`);
         onClose();
       } else {

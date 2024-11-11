@@ -4,6 +4,7 @@ const userSchema = new mongoose.Schema({
   email: { type: String, required: true, unique: true },
   password: { type: String, required: true },
   userId: { type: mongoose.Schema.Types.ObjectId, default: () => new mongoose.Types.ObjectId() }, 
+  role: { type: String, enum: ['admin', 'volunteer'], default: 'volunteer' },
   fullName: { type: String, maxlength: 50 },
   address1: { type: String, maxlength: 100 },
   address2: { type: String, maxlength: 100 },

@@ -1,15 +1,15 @@
 const asyncHandler = require('express-async-handler');
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
-const bcrypt = require('bcrypt'); // Don't forget to install bcrypt
+const bcrypt = require('bcrypt'); //Don't forget to install bcrypt
 
 // Registration handler
 const registerUser = asyncHandler(async (req, res) => {
-  const { email, password } = req.body;
+  const { email, password, role } = req.body;
 
   // Basic validation
-  if (!email || !password) {
-    return res.status(400).json({ error: 'Email and password are required.' });
+  if (!email || !password || !role) {
+    return res.status(400).json({ error: 'Email, password, and role are required.' });
   }
 
   try {
@@ -20,6 +20,7 @@ const registerUser = asyncHandler(async (req, res) => {
     const newUser = new User({
       email,
       password: hashedPassword,
+      role,
     });
 
     // Save the user to the database
@@ -27,7 +28,7 @@ const registerUser = asyncHandler(async (req, res) => {
     
     const token = jwt.sign({ id: newUser._id }, process.env.JWT_SECRET, { expiresIn: '1h' });
 
-
+    console.log("Registered from loginController.js"); //
     res.status(201).json({
       message: 'User registered successfully',
       data: { _id: newUser._id, token },
