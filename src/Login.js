@@ -20,15 +20,18 @@ function Login({ onLogin }) {
       });
 
       if (response.status === 200) {
-        const { userId, token } = response.data;
+        const { userId, profile, token } = response.data;
         localStorage.setItem('token', response.data.token);
         localStorage.setItem('userProfile', JSON.stringify(response.data)); /** */
         alert(`Logged in as ${username}`);
         onLogin();
-
+        
+        console.log("Response: ", response);
         // Check if profile data exists
-        const profileData = response.data.profileData;
+        const profileData = response.data.userProfile;
         if (profileData) {
+          console.log("Profile data exists:", profileData);
+          localStorage.setItem('fullName', profileData.fullName);
           navigate('/home', { state: { name: profileData.fullName } });
         } else {
           navigate('/profile');
