@@ -8,45 +8,52 @@ function MatchingForm() {
   const [selectedEventOption, setSelectedEventOption] = useState(null);
   const [selectedVolunteerOptions, setSelectedVolunteerOptions] = useState([]);
 
-  
-  useEffect(() => {
-    const fetchVolunteers = async () => {
-      try {
-        const response = await fetch('/api/volunteers');
-        const data = await response.json();
-        const formattedVolunteers = data.map(volunteer => ({
-          value: volunteer.id,
-          label: volunteer.name,
+  const fetchMatchingVolunteers = async (eventId) => {
+    console.log('Event ID being passed to backend:', eventId);
+    try {
+        const response = await fetch(`/api/events/matching-volunteers?eventId=${eventId}`);
+        const volunteers = await response.json();
+        console.log('Received matching volunteers:', volunteers);
+        
+        const formattedVolunteers = volunteers.map(volunteer => ({
+            value: volunteer._id,
+            label: volunteer.fullName,
         }));
         setVolunteerList(formattedVolunteers);
-      } catch (error) {
-        console.error('Error fetching volunteers:', error);
-      }
-    };
+    } catch (error) {
+        console.error('Error fetching matching volunteers:', error);
+    }
+};
 
+  useEffect(() => {
     const fetchEvents = async () => {
       try {
         const response = await fetch('/api/events/saved');
         const data = await response.json();
-        const formattedEvents = data.map(event => ({
-          value: event.id,
+        const currentDate = new Date();
+        const futureEvents = data.filter(event => new Date(event.eventDate) > currentDate);
+
+        const formattedEvents = futureEvents.map(event => ({
+          value: event._id,
           label: event.eventName,
-          description: event.eventDescription,
+          description: event.description,
           date: event.eventDate,
           location: event.location,
         }));
+        console.log(formattedEvents);
         setEventOptions(formattedEvents);
       } catch (error) {
         console.error('Error fetching events:', error);
       }
     };
 
-    fetchVolunteers();
     fetchEvents();
   }, []);
 
   const handleEventChange = (selectedOption) => {
+    console.log('Selected event option:', selectedOption);
     setSelectedEventOption(selectedOption);
+    fetchMatchingVolunteers(selectedOption.value);
   };
 
   const handleVolunteerChange = (selectedOptions) => {
@@ -83,42 +90,40 @@ function MatchingForm() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
-    const userId = 123;
-    const data = {
-        userId, 
-        selectedEvent: selectedEventOption,
-        selectedVolunteers: selectedVolunteerOptions.map(vol => vol.value),
-    };
-
-    try {
-        const response = await fetch('/api/saveSelection', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(data),
-        });
-
-        if (!response.ok) {
-            const errorData = await response.json();
-            console.error('Error saving selection:', errorData.error);
-            return;
-        }
-        const assignResponse = await fetch(`/api/users/${userId}/assign-event`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ eventId: selectedEventOption }),
-        });
-
-        if (assignResponse.ok) {
-            console.log('Event assigned successfully');
-        } else {
-            const errorData = await assignResponse.json();
-            console.error('Error assigning event:', errorData.error);
-        }
-    } catch (error) {
-        console.error('Error submitting form:', error);
+    if (!selectedEventOption || selectedVolunteerOptions.length === 0) {
+      alert('Please select an event and at least one volunteer.');
+      return;
     }
-};
+  
+    const volunteerIds = selectedVolunteerOptions.map(volunteer => volunteer.value);
+  
+    try {
+      const response = await fetch('/api/events/assign-volunteers', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          eventId: selectedEventOption.value,
+          volunteerIds: volunteerIds,
+        }),
+      });
+      console.log('Event ID being passed to assign:', selectedEventOption.value);
+      const result = await response.json();
+  
+      if (response.ok) {
+        alert('Volunteers successfully matched to the event!');
+        setSelectedEventOption(null);
+        setSelectedVolunteerOptions([]);
+      } else {
+        alert(`Failed to match volunteers: ${result.message}`);
+      }
+    } catch (error) {
+      console.error('Error submitting match:', error);
+      alert('An error occurred while matching volunteers. Please try again later.');
+    }
+  };
+  
 
 
   return (

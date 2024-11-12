@@ -7,7 +7,10 @@ const eventSchema = new mongoose.Schema({
     location: {type: String, required: true},
     reqSkills: {type: [String], required: true, default: []},
     urgency: {type: String, required: true, enum: ['low', 'medium', 'high']},
-    eventDate: { type: Date, default: [] }
+    eventDate: { type: Date, default: [] },
+    volunteersAssigned: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }]
 });
 
-module.exports = mongoose.model('Event', eventSchema);
+const Event = mongoose.model('Event', eventSchema);
+
+module.exports = Event;

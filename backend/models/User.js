@@ -14,7 +14,7 @@ const userSchema = new mongoose.Schema({
   skills: { type: [String], default: [] },
   preferences: { type: String, default: "None" },
   availability: { type: [Date], default: [] },
-  history: { type: [Number], default: [] }
+  history: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Event' }]
 });
 
 module.exports = mongoose.model('User', userSchema);

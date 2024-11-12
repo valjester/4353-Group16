@@ -2,44 +2,6 @@ const User = require('../models/User');
 const asyncHandler = require('express-async-handler');
 const mongoose = require('mongoose')
 
-/*const createUser = asyncHandler(async (req, res) => {
-  const { email, password } = req.body;
-
-  if (!email || !password) {
-    return res.status(400).json({ error: 'Email and password are required.' });
-  }
-
-  try {
-    const hashedPassword = await bcrypt.hash(password, 10);
-
-    const user = new User({
-      email,
-      password: hashedPassword,
-      skills: [],
-      preferences: "None",
-      availability: [],
-      history: []
-    });
-
-    await user.save();
-
-    console.log("Registered from userController.js"); //
-    res.status(201).json({
-      message: 'User registered successfully',
-      data: {
-        _id: user._id,
-      },
-    });
-  } catch (error) {
-    if (error.code === 11000) { 
-      return res.status(400).json({ error: 'Email already exists.' });
-    }
-    res.status(500).json({ error: error.message || 'Internal Server Error' });
-  }
-});*/
-
-
-
 const assignEventToUser = asyncHandler(async (req, res) => {
   const userId = req.params.id;
   const { eventId } = req.body;
@@ -104,7 +66,6 @@ const updateUserProfile = async (req, res) => {
 };
 
   module.exports = {
-    //createUser,
     getUserProfile,
     updateUserProfile,
     assignEventToUser
