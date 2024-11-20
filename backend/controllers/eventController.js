@@ -40,6 +40,28 @@ const createEvent = async (req, res) => {
     }
 };
 
+/*const editEvent = (req, res) => {
+    const { eventID, eventName, eventDescription, location, requiredSkills, urgency, eventDate } = req.body;
+
+    if (!eventID || !eventName || !eventDescription || !location || !requiredSkills || !urgency || !eventDate) {
+        return res.status(400).json({ error: 'All fields are required' });
+    }
+
+    const modifiedEvent = {
+        eventID,
+        eventName,
+        eventDescription,
+        location,
+        requiredSkills,
+        urgency,
+        eventDate,
+    };
+
+    savedEvents[eventID] = modifiedEvent;
+
+    res.status(201).json(modfiedEvent);
+};*/
+
 
 const getSavedEvents = async (req, res) => {
     try {
@@ -54,5 +76,6 @@ const getSavedEvents = async (req, res) => {
 module.exports = {
     getAllEvents,
     createEvent,
+    /*editEvent,*/
     getSavedEvents,
 };
