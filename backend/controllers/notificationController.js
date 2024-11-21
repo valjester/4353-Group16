@@ -16,7 +16,7 @@ const getFutureUserEvents = asyncHandler(async (req, res) => {
     }
 
     const currentDate = new Date();
-    const allEvents = await getAllEvents();
+    const allEvents = user.history;
 
     const futureEvents = allEvents
         .filter(event => user.history.includes(event.id))
@@ -30,34 +30,46 @@ const getFutureUserEvents = asyncHandler(async (req, res) => {
 })
 
 const getUpcomingUserEvents = asyncHandler(async (req, res) => {
-    const userID = req.params.id;
-    const user = await User.findById(userID);
+    console.log("Get Upcoming User Events called");
 
-    if(!user) {
-        return res.status(404).json({ error: 'User not found.' });
+    const userID = req.user.id;
+    
+    const user = await User.findById(userID).populate('history');
+    if (!user) {
+        return res.status(404).json({ error: 'User not found' });
+    }
+    console.log("User found! Yippee!");
+    console.log("User: ", user);
+    console.log("\nUser History");
+    for (let i = 0; i < user.history.length; i++) {
+        console.log("Event: ", user.history[i]);
     }
 
     if(!user.history || user.history.length === 0) {
+        console.log("No events found");
         return res.status(404).json ({ error: 'No events found for this user.' });
     }
-
     const currentDate = new Date();
     const sevenDaysLater = new Date();
     sevenDaysLater.setDate(currentDate.getDate() + 7);
 
-    const allEvents = await getAllEvents();
+    const allEvents = user.history;
+    console.log("EVENTS:");
+    console.log(allEvents[0]);
+    console.log("Trying name:", allEvents[0].eventName);
+
+    const upcomingEvents = user.history.filter(event => {
+        const eventDate = new Date(event.eventDate); // Assuming event.date exists and is in a valid format
+        console.log(eventDate,'\n', currentDate, '\n', sevenDaysLater);
+        return eventDate >= currentDate && eventDate <= sevenDaysLater;
+    });
     
-    const upcomingEvents = allEvents
-        .filter(event => user.history.includes(event.id))
-        .filter(event => {
-            const eventDate = new Date(event.date);
-            return eventDate >= currentDate && eventDate <= sevenDaysLater;
-        });
-    
-    if (futureEvents.length === 0) {
+    if (upcomingEvents.length === 0) {
         return res.status(404).json({ error: 'No upcoming events found for this user.'});
     }
-
+    
+    console.log("FILTERED:");
+    console.log(upcomingEvents);
     res.status(200).json({ events: upcomingEvents });
 })
 
