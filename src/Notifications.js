@@ -1,26 +1,41 @@
 import React, { useEffect, useState } from 'react';
+import Select from 'react-select';
+import DatePicker from 'react-datepicker';
+import { useNavigate } from 'react-router-dom';
+import 'react-datepicker/dist/react-datepicker.css';
 import axios from 'axios';
 
 function Notifications() {
   const [assignments, setAssignments] = useState([]);
   const [reminders, setReminders] = useState([]);
+  const navigate = useNavigate();
 
   useEffect(() => {
-    const userId = "123";
+    const token = localStorage.getItem('token');
+        if (!token) {
+          alert('User is not logged in');
+          navigate('/login');
+          return;
+        }
 
     const fetchAllUserEvents = async () => {
       try {
-        const response = await axios.get(`/api/users/${userId}/events`);
+        const response = await axios.get(`/api/users/notifications`);
         return response.data.events;
       } catch (error) {
         console.error('Error fetching all user events:', error);
         throw error;
       }
     };
-
+    
     const fetchFutureUserEvents = async () => {
       try {
-        const response = await axios.get(`/api/users/${userId}/events`);
+        const response = await axios.get(`/api/notifications`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        console.log("Future events THIS ONE", response);
         return response.data.events;
       } catch (error) {
         console.error('Error fetching future user events:', error);
@@ -42,9 +57,13 @@ function Notifications() {
 
     fetchFutureUserEvents()
       .then((futureEventsInSevenDays) => {
+        console.log("Future events in seven days:");
+        console.log(futureEventsInSevenDays);
         const reminderNotifications = futureEventsInSevenDays.map((event, index) => ({
           id: index + 1,
-          message: `Reminder: Event ${event.name} is coming up on ${new Date(event.date).toLocaleDateString()}.`,
+          message: [
+            `${event.eventName} is coming up on ${new Date(event.eventDate).toLocaleDateString()}.</br>\tDescription: ${event.description}</br>\tLocation: ${event.location}</br></br>`
+          ]
         }));
         setReminders(reminderNotifications);
       })
@@ -56,30 +75,15 @@ function Notifications() {
   return (
     <div className="notifications-container">
       <h1>Notifications Center</h1>
-      <h2>Event assignments, updates, and reminders will be viewed here.</h2>
-
-      <div className="section">
-        <h3>New Assignments</h3>
-        <div className="notifications-list">
-          {assignments.length > 0 ? (
-            assignments.map((notification) => (
-              <div key={notification.id} className="notification-box">
-                {notification.message}
-              </div>
-            ))
-          ) : (
-            <div>No new assignments.</div>
-          )}
-        </div>
-      </div>
-
       <div className="section">
         <h3>Reminders</h3>
         <div className="notifications-list">
           {reminders.length > 0 ? (
             reminders.map((notification) => (
               <div key={notification.id} className="notification-box">
-                {notification.message}
+                {/* Render message with HTML tags using dangerouslySetInnerHTML */}
+                <div dangerouslySetInnerHTML={{ __html: notification.message }}>
+                </div>
               </div>
             ))
           ) : (
@@ -88,7 +92,7 @@ function Notifications() {
         </div>
       </div>
     </div>
-  );
+  );  
 }
 
 export default Notifications;

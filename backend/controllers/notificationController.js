@@ -3,30 +3,34 @@ const asyncHandler = require('express-async-handler');
 const { getAllEvents } = require('./eventController');
 const User = require('../models/User');
 
-const getFutureUserEvents = asyncHandler(async (req, res) => {
-    const userID = req.params.id;
-    const user = await User.findById(userID);
+const getAllUserEvents = asyncHandler(async (req, res) => {
+    console.log("Get Upcoming User Events called");
 
-    if(!user) {
-        return res.status(404).json({ error: 'User not found.' });
+    const userID = req.user.id;
+    
+    const user = await User.findById(userID).populate('history');
+    if (!user) {
+        return res.status(404).json({ error: 'User not found' });
+    }
+    console.log("User found! Yippee!");
+    console.log("User: ", user);
+    console.log("\nUser History");
+    for (let i = 0; i < user.history.length; i++) {
+        console.log("Event: ", user.history[i]);
     }
 
     if(!user.history || user.history.length === 0) {
+        console.log("No events found");
         return res.status(404).json ({ error: 'No events found for this user.' });
     }
-
     const currentDate = new Date();
+    const sevenDaysLater = new Date();
+    sevenDaysLater.setDate(currentDate.getDate() + 7);
+
     const allEvents = user.history;
-
-    const futureEvents = allEvents
-        .filter(event => user.history.includes(event.id))
-        .filter(event => new Date(event.date >= currentDate));
-    
-    if (futureEvents.length === 0) {
-        return res.status(404).json({ error: 'No future events found for this user.'});
-    }
-
-    res.status(200).json({ events: futureEvents });
+    console.log("EVENTS:");
+    console.log(allEvents);
+    res.status(200).json({ events: allEvents });
 })
 
 const getUpcomingUserEvents = asyncHandler(async (req, res) => {
@@ -74,6 +78,6 @@ const getUpcomingUserEvents = asyncHandler(async (req, res) => {
 })
 
 module.exports = {
-    getFutureUserEvents,
+    getAllUserEvents,
     getUpcomingUserEvents,
 };
