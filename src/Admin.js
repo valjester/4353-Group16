@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { jwtDecode } from 'jwt-decode'; //npm install jwt-decode
 
 import EventForm from './EventForm';
+import EventEditForm from './EventEditForm';
 import MatchingForm from './MatchingForm';
 
 function Admin() {
@@ -13,7 +14,7 @@ function Admin() {
         const token = localStorage.getItem('token');
 
         if (!token) {
-            navigate('/login');
+            //navigate('/login');
             return;
         }
 
@@ -35,6 +36,7 @@ function Admin() {
     return (
         <div>
             <EventForm />
+            <EventEditForm />
             <MatchingForm />
         </div>
     );
