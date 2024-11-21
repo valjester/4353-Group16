@@ -11,15 +11,22 @@ function MatchingForm() {
   const fetchMatchingVolunteers = async (eventId) => {
     console.log('Event ID being passed to backend:', eventId);
     try {
-        const response = await fetch(`/api/events/matching-volunteers?eventId=${eventId}`);
-        const volunteers = await response.json();
-        console.log('Received matching volunteers:', volunteers);
-        
-        const formattedVolunteers = volunteers.map(volunteer => ({
-            value: volunteer._id,
-            label: volunteer.fullName,
+      const response = await fetch(`/api/events/matching-volunteers?eventId=${eventId}`);
+      const volunteers = await response.json();
+      console.log('Received matching volunteers:', volunteers);
+
+      const formattedVolunteers = volunteers.map(volunteer => ({
+        value: volunteer._id,
+        label: volunteer.fullName,
+        isAssigned: volunteer.history.some(
+          (eventIdInHistory) => eventIdInHistory === eventId
+        ),
         }));
+
         setVolunteerList(formattedVolunteers);
+        
+      const assignedVolunteers = formattedVolunteers.filter(v => v.isAssigned);
+      setSelectedVolunteerOptions(assignedVolunteers);
     } catch (error) {
         console.error('Error fetching matching volunteers:', error);
     }
