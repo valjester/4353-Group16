@@ -6,7 +6,7 @@ import Profile from './Profile';
 import Home from './Home';
 import Taskbar from './components/Taskbar';
 import EventForm from './EventForm';
-/*import EventEditForm from './EventEditForm';*/
+import EventEditForm from './EventEditForm';
 import MatchingForm from './MatchingForm';
 import Notifications from './Notifications';
 import Admin from './Admin';
@@ -32,9 +32,7 @@ function App() {
           <Route path="/home" element={<Home formData={formData} />} />
           <Route path="/admin" element={<Admin />} />
           <Route path="/eventform" element={<EventForm />} />
-          {/*
           <Route path="/eventeditform" element={<EventEditForm />} />
-          */}
           <Route path="/matchingform" element={<MatchingForm />} />
           <Route path="/notifications" element={<Notifications />} />
           <Route path="/history" element={<History />} />

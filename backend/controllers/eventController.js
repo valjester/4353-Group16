@@ -40,7 +40,7 @@ const createEvent = async (req, res) => {
     }
 };
 
-/*const editEvent = (req, res) => {
+const editEvent = (req, res) => {
     const { eventID, eventName, eventDescription, location, requiredSkills, urgency, eventDate } = req.body;
 
     if (!eventID || !eventName || !eventDescription || !location || !requiredSkills || !urgency || !eventDate) {
@@ -60,7 +60,7 @@ const createEvent = async (req, res) => {
     savedEvents[eventID] = modifiedEvent;
 
     res.status(201).json(modfiedEvent);
-};*/
+};
 
 
 const getSavedEvents = async (req, res) => {
@@ -76,6 +76,6 @@ const getSavedEvents = async (req, res) => {
 module.exports = {
     getAllEvents,
     createEvent,
-    /*editEvent,*/
+    editEvent,
     getSavedEvents,
 };

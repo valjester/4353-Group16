@@ -1,8 +1,7 @@
 import Select from 'react-select';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
-import React, { useState } from 'react';
-import axios from 'axios';
+import React, { useState, useEffect } from 'react';
 
 function EventEditForm() {
     const [eventOptions, setEventOptions] = useState([]);
@@ -30,12 +29,12 @@ function EventEditForm() {
     useEffect(() => {
         const fetchEvents = async () => {
             try {
-                const response = await axios.post('/api/events/saved');
+                const response = await fetch('/api/events/saved');
                 const data = await response.json();
                 const formattedEvents = data.map(event => ({
-                    value: event.id,
+                    value: event._id,
                     label: event.eventName,
-                    description: event.eventDescription,
+                    description: event.description,
                     date: event.eventDate,
                     location: event.location,
                     requiredSkills: event.requiredSkills || [],
@@ -55,11 +54,12 @@ function EventEditForm() {
         setEventName(event.label);
         setEventDescription(event.description || '');
         setLocation(event.location || '');
-        setRequiredSkills(event.requiredSkills.map(skill => ({
-            value: skill,
-            label: skill,
-        })) || []);
-        setUrgency(urgencyOptions.find(option => option.value === event.urgency) || '');
+        setRequiredSkills(
+            event.requiredSkills.map(skill => ({ value: skill, label: skill })) || []
+        );
+        setUrgency(
+            urgencyOptions.find(option => option.value === event.urgency) || ''
+        );
         setEventDate(event.date ? new Date(event.date) : null);
     };
 
@@ -89,9 +89,11 @@ function EventEditForm() {
             } else {
                 const errorData = await response.json();
                 console.error('Error updating event:', errorData);
+                alert('Failed to update the event. Please try again.');
             }
         } catch (error) {
             console.error('Error submitting form:', error);
+            alert('An error occurred while updating the event.');
         }
     };
 
@@ -177,7 +179,7 @@ function EventEditForm() {
                         />
                     </div>
 
-                    <button type="submit" className="form-button">Update Event</button>
+                    <button type="submit" className="form-button">Submit</button>
                 </form>
             )}
         </div>

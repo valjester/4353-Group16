@@ -11,7 +11,7 @@ router.get('/', eventController.getAllEvents);
 
 router.post('/', eventController.createEvent);
 
-/*router.post('/', eventController.editEvent);*/
+router.post('/', eventController.editEvent);
 
 router.get('/saved', eventController.getSavedEvents);
 
