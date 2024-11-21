@@ -15,10 +15,16 @@ function EventEditForm() {
     const [eventDate, setEventDate] = useState(null);
 
     const skillOptions = [
-        { value: 'skill1', label: 'Skill 1' },
-        { value: 'skill2', label: 'Skill 2' },
-        { value: 'skill3', label: 'Skill 3' }
-    ];
+        { value: 'fundraising', label: 'Fundraising' },
+        { value: 'dataentry', label: 'Data Entry' },
+        { value: 'outreach', label: 'Community Outreach' },
+        { value: 'eventplanning', label: 'Event Planning' },
+        { value: 'technology', label: 'Tech Assistance/IT' },
+        { value: 'counseling', label: 'Counseling' },
+        { value: 'photography', label: 'Photography' },
+        { value: 'socialmedia', label: 'Social Media Management' },
+        { value: 'marketresearch', label: 'Marketing & Research' }
+      ];
 
     const urgencyOptions = [
         { value: 'high', label: 'High' },
@@ -31,13 +37,14 @@ function EventEditForm() {
             try {
                 const response = await fetch('/api/events/saved');
                 const data = await response.json();
+                console.log('Fetched Event Data:', data);
                 const formattedEvents = data.map(event => ({
                     value: event._id,
                     label: event.eventName,
                     description: event.description,
                     date: event.eventDate,
                     location: event.location,
-                    requiredSkills: event.requiredSkills || [],
+                    requiredSkills: event.reqSkills || [],
                     urgency: event.urgency || '',
                 }));
                 setEventOptions(formattedEvents);
@@ -50,12 +57,16 @@ function EventEditForm() {
     }, []);
 
     const handleEventSelect = (event) => {
+        console.log('Selected Event:', event);
         setSelectedEvent(event);
         setEventName(event.label);
         setEventDescription(event.description || '');
         setLocation(event.location || '');
         setRequiredSkills(
-            event.requiredSkills.map(skill => ({ value: skill, label: skill })) || []
+            event.requiredSkills.map(skill => {
+                const option = skillOptions.find(option => option.value === skill);
+                return option || { value: skill, label: skill };
+            }) || []
         );
         setUrgency(
             urgencyOptions.find(option => option.value === event.urgency) || ''
@@ -78,7 +89,9 @@ function EventEditForm() {
         try {
             const response = await fetch(`/api/events/${selectedEvent.value}`, {
                 method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
+                headers: { 'Content-Type': 'application/json',
+                           'Authorization': `Bearer ${localStorage.getItem('token')}`
+                 },
                 body: JSON.stringify(updatedEvent),
             });
 

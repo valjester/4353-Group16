@@ -15,7 +15,13 @@ function EventForm() {
     const skillOptions = [
         { value: 'fundraising', label: 'Fundraising' },
         { value: 'dataentry', label: 'Data Entry' },
-        { value: 'outreach', label: 'Community Outreach' }
+        { value: 'outreach', label: 'Community Outreach' },
+        { value: 'eventplanning', label: 'Event Planning' },
+        { value: 'technology', label: 'Tech Assistance/IT' },
+        { value: 'counseling', label: 'Counseling' },
+        { value: 'photography', label: 'Photography' },
+        { value: 'socialmedia', label: 'Social Media Management' },
+        { value: 'marketresearch', label: 'Marketing & Research' }
       ];
 
     const urgencyOptions = [
@@ -36,9 +42,9 @@ function EventForm() {
             eventName,
             description,
             location,
-            reqSkills: reqSkills.map(skill => skill.value), // Convert to array of skill values
-            urgency: urgency.value, // Get the value from the selected urgency option
-            eventDate: eventDate.toISOString(), // Convert date to ISO string
+            reqSkills: reqSkills.map(skill => skill.value), //Convert to array of skill values
+            urgency: urgency.value,
+            eventDate: eventDate.toISOString(),
         };
         console.log(eventData);
 

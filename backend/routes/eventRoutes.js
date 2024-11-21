@@ -9,15 +9,17 @@ const { getMatchingVolunteers, assignVolunteersToEvent } = require('../controlle
 
 router.get('/', eventController.getAllEvents);
 
-router.post('/', eventController.createEvent);
+router.post('/admin', protectAdminRoute, eventController.createEvent);
 
-router.post('/', eventController.editEvent);
+router.put('/:id', protectAdminRoute, eventController.editEvent);
 
 router.get('/saved', eventController.getSavedEvents);
 
-router.post('/admin', protectAdminRoute, eventController.createEvent);
-
 router.get('/matching-volunteers', getMatchingVolunteers);
 router.post('/assign-volunteers', assignVolunteersToEvent);
+
+//router.post('/', eventController.createEvent);
+
+//router.post('/', eventController.editEvent);
 
 module.exports = router;
