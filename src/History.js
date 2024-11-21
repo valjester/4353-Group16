@@ -8,21 +8,12 @@ const History = ({ userId }) => {
     useEffect(() => {
         const fetchHistory = async () => {
             try {
-                const userData = {
-                    123: {
-                        history: [
-                            {
-                                eventName: 'Community Cleanup',
-                                eventDate: '2024-10-01',
-                                location: 'Central Park',
-                                description: 'Participated in a community cleanup event.',
-                            },
-                        ],
-                    },
-                };
-
-                const userHistory = userData[userId]?.history || [];
-                setHistory(userHistory);
+                const response = await fetch(`/api/users/${userId}/history`); // Call the backend endpoint
+                if (!response.ok) {
+                    throw new Error('Failed to fetch history');
+                }
+                const data = await response.json();
+                setHistory(data.history);
             } catch (err) {
                 setError('Failed to load history.');
             } finally {
@@ -53,7 +44,7 @@ const History = ({ userId }) => {
                     {history.map((event, index) => (
                         <li key={index}>
                             <h3>{event.eventName}</h3>
-                            <p>Date: {event.eventDate}</p>
+                            <p>Date: {new Date(event.eventDate).toLocaleDateString()}</p>
                             <p>Location: {event.location}</p>
                             <p>Description: {event.description}</p>
                         </li>

@@ -101,6 +101,21 @@ const updateUserProfile = async (req, res) => {
   }
 };
 
+const getUserHistory = async (req, res) => {
+  const { userId } = req.params;
+
+  try {
+      const user = await User.findById(userId).populate('history'); // Populate event details
+      if (!user) {
+          return res.status(404).json({ error: 'User not found' });
+      }
+      res.status(200).json({ history: user.history });
+  } catch (error) {
+      console.error('Error fetching user history:', error);
+      res.status(500).json({ error: 'Server error' });
+  }
+};
+
   module.exports = {
     createUser,
     getUserProfile,

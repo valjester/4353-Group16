@@ -2,6 +2,9 @@ const express = require('express');
 const router = express.Router();
 const userController = require('../controllers/userController');
 const { registerUser, loginUser } = require('../controllers/loginController');
+const { authenticateToken } = require('./authMiddleware');
+const { getUserHistory } = require('../controllers/userController');
+
 // get a user's profile by ID
 router.get('/:id', userController.getUserProfile);
 
@@ -15,6 +18,9 @@ router.post('/register', registerUser);
 router.post('/login', loginUser);
 
 // assign an event to a user by ID
-router.post('/:id', userController.assignEventToUser);
+router.post('/:id', authenticateToken, userController.assignEventToUser);
+
+// fetch user history
+router.get('/:userId/history', getUserHistory); 
 
 module.exports = router;
