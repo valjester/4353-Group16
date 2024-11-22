@@ -63,7 +63,7 @@ const getUpcomingUserEvents = asyncHandler(async (req, res) => {
     console.log("Trying name:", allEvents[0].eventName);
 
     const upcomingEvents = user.history.filter(event => {
-        const eventDate = new Date(event.eventDate); // Assuming event.date exists and is in a valid format
+        const eventDate = new Date(event.eventDate);
         console.log(eventDate,'\n', currentDate, '\n', sevenDaysLater);
         return eventDate >= currentDate && eventDate <= sevenDaysLater;
     });

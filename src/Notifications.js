@@ -59,7 +59,12 @@ function Notifications() {
       .then((futureEventsInSevenDays) => {
         console.log("Future events in seven days:");
         console.log(futureEventsInSevenDays);
-        const reminderNotifications = futureEventsInSevenDays.map((event, index) => ({
+
+        const sortedEvents = futureEventsInSevenDays.sort((a, b) => 
+          new Date(a.eventDate) - new Date(b.eventDate) //Sorting by date
+        );
+
+        const reminderNotifications = sortedEvents.map((event, index) => ({
           id: index + 1,
           message: [
             `${event.eventName} is coming up on ${new Date(event.eventDate).toLocaleDateString()}.</br>\tDescription: ${event.description}</br>\tLocation: ${event.location}</br></br>`

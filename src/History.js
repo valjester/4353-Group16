@@ -25,11 +25,15 @@ const History = ({ userId }) => {
                     },
                 });
                 console.log("Response:", response);
-                // Assuming the response contains an array of events
+                
                 const userHistory = response.data.events;
                 console.log("User history: ", userHistory);
 
-                setHistory(userHistory); // Update the state with fetched history
+                const filteredAndSortedHistory = userHistory
+                .filter(event => new Date(event.eventDate) < new Date()) //Show only past events
+                .sort((a, b) => new Date(a.eventDate) - new Date(b.eventDate)); //Sort display from oldest to newest
+
+                setHistory(filteredAndSortedHistory);
             } catch (error) {
                 console.error("Error fetching history: ", error);
                 setError('Failed to load history. Please try again later.');
