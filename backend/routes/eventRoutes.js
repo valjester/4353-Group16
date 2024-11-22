@@ -18,8 +18,8 @@ router.get('/saved', eventController.getSavedEvents);
 router.get('/matching-volunteers', getMatchingVolunteers);
 router.post('/assign-volunteers', assignVolunteersToEvent);
 
-//router.post('/', eventController.createEvent);
+router.post('/', eventController.createEvent);
 
-//router.post('/', eventController.editEvent);
+router.post('/', eventController.editEvent);
 
 module.exports = router;

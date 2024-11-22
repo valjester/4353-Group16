@@ -2,22 +2,6 @@ const User = require('../models/User');
 const asyncHandler = require('express-async-handler');
 const mongoose = require('mongoose')
 
-const assignEventToUser = asyncHandler(async (req, res) => {
-  const userId = req.params.id;
-  const { eventId } = req.body;
-
-  const user = await User.findById(userId);
-
-  if (!user) {
-    return res.status(404).json({ error: 'User not found.' });
-  }
-
-  user.history.push(eventId);
-  await user.save();
-
-  res.json({ message: 'Event assigned successfully', data: user });
-});
-
 const getUserProfile = async (req, res) => {
   console.log('getUserProfile called.')
   const userId = req.user.id;
@@ -32,7 +16,7 @@ const getUserProfile = async (req, res) => {
       return res.status(404).json({ error: 'User not found.' });
     }
     console.log(user)
-    res.status(200).json({ data: user.toObject() }); /** */
+    res.status(200).json({ data: user.toObject() });
   } catch (error) {
     res.status(500).json({ error: error.message || 'Internal Server Error' });
   }
@@ -68,6 +52,6 @@ const updateUserProfile = async (req, res) => {
   module.exports = {
     getUserProfile,
     updateUserProfile,
-    assignEventToUser
+    //assignEventToUser
   };
   

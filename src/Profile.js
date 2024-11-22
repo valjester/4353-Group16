@@ -9,7 +9,13 @@ function Profile({ setFormData }) {
   const skillSelection = [
     { value: 'fundraising', label: 'Fundraising' },
     { value: 'dataentry', label: 'Data Entry' },
-    { value: 'outreach', label: 'Community Outreach' }
+    { value: 'outreach', label: 'Community Outreach' },
+    { value: 'eventplanning', label: 'Event Planning' },
+    { value: 'technology', label: 'Tech Assistance/IT' },
+    { value: 'counseling', label: 'Counseling' },
+    { value: 'photography', label: 'Photography' },
+    { value: 'socialmedia', label: 'Social Media Management' },
+    { value: 'marketresearch', label: 'Marketing & Research' }
   ];
 
   const stateSelection = [

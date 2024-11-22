@@ -16,7 +16,4 @@ router.post('/register', registerUser);
 // create a new user
 router.post('/login', loginUser);
 
-// assign an event to a user by ID
-router.post('/:id', authenticateToken, userController.assignEventToUser);
-
 module.exports = router;
