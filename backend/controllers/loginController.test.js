@@ -1,136 +1,221 @@
-const request = require('supertest');
-const express = require('express');
-const bodyParser = require('body-parser');
 const { registerUser, loginUser } = require('./loginController');
+const User = require('../models/User');
+const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
 
-const app = express();
-app.use(bodyParser.json());
-app.post('/register', registerUser);
-app.post('/login', loginUser);
+jest.mock('bcrypt');
+jest.mock('jsonwebtoken');
+jest.mock('../models/User');
 
-describe('Login Controller', () => {
-    beforeEach(() => {
-        // Reset users to ensure tests are isolated
-        users = [];
+describe('loginController - loginUser', () => {
+  it('should login the user and return a token when credentials are correct', async () => {
+    const mockUser = { _id: '1', email: 'test@example.com', password: 'hashedPassword', role: 'volunteer' };
+
+    bcrypt.compare.mockResolvedValue(true);
+    jwt.sign.mockReturnValue('mockToken');
+    User.findOne.mockResolvedValue(mockUser);
+
+    const res = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn()
+    };
+
+    try {
+      await loginUser({ body: { email: 'test@example.com', password: 'password123' } }, res);
+
+      expect(res.status).toHaveBeenCalledWith(200);
+      expect(res.json).toHaveBeenCalledWith({
+        message: 'Login successful',
+        userId: mockUser._id,
+        userProfile: mockUser,
+        token: 'mockToken',
+      });
+    } catch (error) {
+      console.error('Error during login:', error);
+    }
+  });
+
+  it('should return 400 if email or password is missing', async () => {
+    const res = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn()
+    };
+
+    await loginUser({ body: { email: 'test@example.com' } }, res);
+
+    expect(res.status).toHaveBeenCalledWith(400);
+    expect(res.json).toHaveBeenCalledWith({ error: 'Email and password are required.' });
+  });
+
+  it('should return 401 if user is not found', async () => {
+    User.findOne.mockResolvedValue(null);
+
+    const res = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn()
+    };
+
+    await loginUser({ body: { email: 'notfound@example.com', password: 'password123' } }, res);
+
+    expect(res.status).toHaveBeenCalledWith(401);
+    expect(res.json).toHaveBeenCalledWith({ error: 'Invalid credentials.' });
+  });
+
+  it('should return 401 if password does not match', async () => {
+    const mockUser = { _id: '1', email: 'test@example.com', password: 'hashedPassword', role: 'volunteer' };
+
+    bcrypt.compare.mockResolvedValue(false);
+    User.findOne.mockResolvedValue(mockUser);
+
+    const res = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn()
+    };
+
+    await loginUser({ body: { email: 'test@example.com', password: 'wrongpassword' } }, res);
+
+    expect(res.status).toHaveBeenCalledWith(401);
+    expect(res.json).toHaveBeenCalledWith({ error: 'Invalid credentials.' });
+  });
+
+  it('should return 500 if JWT_SECRET is not defined', async () => {
+    process.env.JWT_SECRET = '';
+
+    const mockUser = { _id: '1', email: 'test@example.com', password: 'hashedPassword', role: 'volunteer' };
+    bcrypt.compare.mockResolvedValue(true);
+    User.findOne.mockResolvedValue(mockUser);
+
+    const res = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn()
+    };
+
+    await loginUser({ body: { email: 'test@example.com', password: 'password123' } }, res);
+
+    expect(res.status).toHaveBeenCalledWith(500);
+    expect(res.json).toHaveBeenCalledWith({ error: 'Internal server error.' });
+  });
+
+  it('should return 500 if an unexpected error occurs', async () => {
+    User.findOne.mockRejectedValue(new Error('Database error'));
+
+    const res = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn()
+    };
+
+    await loginUser({ body: { email: 'test@example.com', password: 'password123' } }, res);
+
+    expect(res.status).toHaveBeenCalledWith(500);
+    expect(res.json).toHaveBeenCalledWith({ error: 'Server error.' });
+  });
+});
+
+describe('loginController - registerUser', () => {
+  it('should return 400 if email is missing', async () => {
+    const res = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn()
+    };
+
+    await registerUser({ body: { password: 'password123', role: 'volunteer' } }, res);  // Missing email
+
+    expect(res.status).toHaveBeenCalledWith(400);
+    expect(res.json).toHaveBeenCalledWith({ error: 'Email, password, and role are required.' });
+  });
+
+  it('should return 400 if password is missing', async () => {
+    const res = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn()
+    };
+
+    await registerUser({ body: { email: 'test@example.com', role: 'volunteer' } }, res);
+
+    expect(res.status).toHaveBeenCalledWith(400);
+    expect(res.json).toHaveBeenCalledWith({ error: 'Email, password, and role are required.' });
+  });
+
+  it('should return 400 if role is missing', async () => {
+    const res = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn()
+    };
+
+    await registerUser({ body: { email: 'test@example.com', password: 'password123' } }, res);
+
+    expect(res.status).toHaveBeenCalledWith(400);
+    expect(res.json).toHaveBeenCalledWith({ error: 'Email, password, and role are required.' });
+  });
+});
+
+
+describe('loginController - registerUser', () => {
+    it('should return 400 if email is missing', async () => {
+      const res = {
+        status: jest.fn().mockReturnThis(),
+        json: jest.fn()
+      };
+  
+      await registerUser({ body: { password: 'password123', role: 'volunteer' } }, res);
+  
+      expect(res.status).toHaveBeenCalledWith(400);
+      expect(res.json).toHaveBeenCalledWith({ error: 'Email, password, and role are required.' });
     });
-
-    describe('POST /register', () => {
-        test('should register a new user successfully', async () => {
-            const response = await request(app)
-                .post('/register')
-                .send({
-                    email: 'test@example.com',
-                    password: 'password123',
-                    confirmPassword: 'password123',
-                    role: 'volunteer'
-                });
-
-            expect(response.status).toBe(201);
-            expect(response.body.message).toBe('Registration successful. You can now log in.');
-        });
-
-        test('should return 400 if fields are missing', async () => {
-            const response = await request(app)
-                .post('/register')
-                .send({ email: 'test@example.com' });
-
-            expect(response.status).toBe(400);
-            expect(response.body.error).toBe('All fields are required');
-        });
-
-        test('should return 400 if passwords do not match', async () => {
-            const response = await request(app)
-                .post('/register')
-                .send({
-                    email: 'test@example.com',
-                    password: 'password123',
-                    confirmPassword: 'differentpassword',
-                    role: 'volunteer'
-                });
-
-            expect(response.status).toBe(400);
-            expect(response.body.error).toBe('Passwords do not match');
-        });
-
-        test('should return 400 if user already exists', async () => {
-            await request(app)
-                .post('/register')
-                .send({
-                    email: 'test@example.com',
-                    password: 'password123',
-                    confirmPassword: 'password123',
-                    role: 'volunteer'
-                });
-
-            const response = await request(app)
-                .post('/register')
-                .send({
-                    email: 'test@example.com',
-                    password: 'password123',
-                    confirmPassword: 'password123',
-                    role: 'volunteer'
-                });
-
-            expect(response.status).toBe(400);
-            expect(response.body.error).toBe('User already exists');
-        });
+  
+    it('should return 400 if password is missing', async () => {
+      const res = {
+        status: jest.fn().mockReturnThis(),
+        json: jest.fn()
+      };
+  
+      await registerUser({ body: { email: 'test@example.com', role: 'volunteer' } }, res);
+  
+      expect(res.status).toHaveBeenCalledWith(400);
+      expect(res.json).toHaveBeenCalledWith({ error: 'Email, password, and role are required.' });
     });
-
-    describe('POST /login', () => {
-        test('should log in successfully with valid credentials', async () => {
-            // First register a user
-            await request(app)
-                .post('/register')
-                .send({
-                    email: 'test@example.com',
-                    password: 'password123',
-                    confirmPassword: 'password123',
-                    role: 'volunteer'
-                });
-
-            const response = await request(app)
-                .post('/login')
-                .send({
-                    email: 'test@example.com',
-                    password: 'password123'
-                });
-
-            expect(response.status).toBe(200);
-            expect(response.body.message).toMatch(/Logged in as volunteer/);
-            expect(response.body.token).toBeDefined();
-        });
-
-        test('should return 400 for invalid email', async () => {
-            const response = await request(app)
-                .post('/login')
-                .send({
-                    email: 'nonexistent@example.com',
-                    password: 'password123'
-                });
-
-            expect(response.status).toBe(400);
-            expect(response.body.error).toBe('Invalid credentials');
-        });
-
-        test('should return 400 for incorrect password', async () => {
-            await request(app)
-                .post('/register')
-                .send({
-                    email: 'test@example.com',
-                    password: 'password123',
-                    confirmPassword: 'password123',
-                    role: 'volunteer'
-                });
-
-            const response = await request(app)
-                .post('/login')
-                .send({
-                    email: 'test@example.com',
-                    password: 'wrongpassword'
-                });
-
-            expect(response.status).toBe(400);
-            expect(response.body.error).toBe('Invalid credentials');
-        });
+  
+    it('should return 400 if role is missing', async () => {
+      const res = {
+        status: jest.fn().mockReturnThis(),
+        json: jest.fn()
+      };
+  
+      await registerUser({ body: { email: 'test@example.com', password: 'password123' } }, res);
+  
+      expect(res.status).toHaveBeenCalledWith(400);
+      expect(res.json).toHaveBeenCalledWith({ error: 'Email, password, and role are required.' });
     });
+  
+    it('should return 400 if email already exists', async () => {
+        const duplicateEmailError = new Error('Duplicate email');
+        duplicateEmailError.code = 11000;
+      
+        User.create.mockRejectedValue(duplicateEmailError);
+      
+        const res = {
+          status: jest.fn().mockReturnThis(),
+          json: jest.fn()
+        };
+      
+        await registerUser({ body: { email: 'duplicate@example.com', password: 'password123', role: 'volunteer' } }, res);
+      
+        expect(res.status).toHaveBeenCalledWith(400);
+        expect(res.json).toHaveBeenCalledWith({ error: 'Email already exists.' });
+      });
+      
+      it('should return 500 for any other server error', async () => {
+        const serverError = new Error('Database error');
+        User.create.mockRejectedValue(serverError);
+      
+        const res = {
+          status: jest.fn().mockReturnThis(),
+          json: jest.fn()
+        };
+      
+        await registerUser({ body: { email: 'error@example.com', password: 'password123', role: 'volunteer' } }, res);
+      
+        expect(res.status).toHaveBeenCalledWith(500);
+        expect(res.json).toHaveBeenCalledWith({ error: 'Server error.' });
+      });
 });

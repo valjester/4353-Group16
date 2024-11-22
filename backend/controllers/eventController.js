@@ -1,5 +1,3 @@
-// backend/controllers/eventController.js
-
 const Event = require('../models/Event');
 
 const getAllEvents = async (req, res) => {
@@ -41,7 +39,7 @@ const createEvent = async (req, res) => {
 
 const editEvent = async (req, res) => {
     console.log('Request body:', req.body);
-    const { eventID, eventName, eventDescription, location, requiredSkills, urgency, eventDate } = req.body;
+    const { eventName, eventDescription, location, requiredSkills, urgency, eventDate } = req.body;
 
     if (!eventName || !eventDescription || !location || !requiredSkills || !urgency || !eventDate) {
         return res.status(400).json({ error: 'All fields are required' });

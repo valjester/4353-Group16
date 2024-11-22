@@ -1,64 +1,279 @@
-const request = require('supertest');
-const express = require('express');
-const eventController = require('../controllers/eventController');
+const Event = require('../models/Event');
+const { getAllEvents, createEvent, editEvent, getSavedEvents } = require('../controllers/eventController');
 
-const app = express();
-app.use(express.json());
-app.get('/events', eventController.getAllEvents);
-app.post('/events', eventController.addEvent);
-app.get('/events/saved', eventController.getSavedEvents);
+jest.mock('../models/Event');
 
 describe('Event Controller', () => {
-    beforeEach(() => {
-        eventController.savedEvents = [
-            {
-                id: 1,
-                eventName: 'Community Cleanup',
-                eventDescription: 'Join us for a day of cleaning up the local park!',
-                location: 'Central Park',
-                requiredSkills: ['teamwork', 'communication'],
-                urgency: 'high',
-                eventDate: '2024-10-25',
-            },
-        ];
-    });
 
-    test('GET /events should return all events', async () => {
-        const response = await request(app).get('/events');
-        expect(response.status).toBe(200);
-        expect(response.body).toEqual(eventController.savedEvents);
-    });
+    describe('getAllEvents', () => {
+        it('should return all events', async () => {
+            const req = {};
+            const res = {
+                status: jest.fn().mockReturnThis(),
+                json: jest.fn()
+            };
 
-    test('POST /events should add a new event and return it', async () => {
-        const newEvent = {
-            eventName: 'Food Drive',
-            eventDescription: 'Collecting non-perishable food items.',
-            location: 'Community Center',
-            requiredSkills: ['organization', 'communication'],
-            urgency: 'medium',
-            eventDate: '2024-11-15',
-        };
+            const mockEvents = [{ eventName: 'Event 1' }, { eventName: 'Event 2' }];
+            Event.find.mockResolvedValue(mockEvents);
 
-        const response = await request(app)
-            .post('/events')
-            .send(newEvent);
+            await getAllEvents(req, res);
 
-        expect(response.status).toBe(201);
-        expect(response.body).toEqual({
-            id: 2,
-            ...newEvent,
+            expect(res.status).toHaveBeenCalledWith(200);
+            expect(res.json).toHaveBeenCalledWith(mockEvents);
         });
 
-        const getAllResponse = await request(app).get('/events');
-        expect(getAllResponse.body.length).toBe(2);
+        it('should return 500 if there is a server error', async () => {
+            const req = {};
+            const res = {
+                status: jest.fn().mockReturnThis(),
+                json: jest.fn()
+            };
+
+            Event.find.mockRejectedValue(new Error('Database error'));
+
+            await getAllEvents(req, res);
+
+            expect(res.status).toHaveBeenCalledWith(500);
+            expect(res.json).toHaveBeenCalledWith({ error: 'Server error' });
+        });
     });
 
-    test('POST /events should return 400 if required fields are missing', async () => {
-        const response = await request(app)
-            .post('/events')
-            .send({});
+    describe('createEvent', () => {
+        it('should return 400 if required fields are missing', async () => {
+            const req = {
+                body: {
+                    eventName: 'Test Event',
+                }
+            };
+            const res = {
+                status: jest.fn().mockReturnThis(),
+                json: jest.fn()
+            };
 
-        expect(response.status).toBe(400);
-        expect(response.body).toEqual({ error: 'All fields are required' });
+            await createEvent(req, res);
+
+            expect(res.status).toHaveBeenCalledWith(400);
+            expect(res.json).toHaveBeenCalledWith({ error: 'All fields are required' });
+        });
+
+        it('should create an event and return it', async () => {
+            const req = {
+                body: {
+                    eventName: 'Test Event',
+                    description: 'Test Description',
+                    location: 'Test Location',
+                    reqSkills: ['skill1'],
+                    urgency: 'High',
+                    eventDate: '2024-12-12'
+                }
+            };
+            const res = {
+                status: jest.fn().mockReturnThis(),
+                json: jest.fn()
+            };
+
+            const mockSavedEvent = {
+                eventName: 'Test Event',
+                description: 'Test Description',
+                location: 'Test Location',
+                reqSkills: ['skill1'],
+                urgency: 'High',
+                eventDate: new Date('2024-12-12')
+            };
+
+            Event.prototype.save.mockResolvedValue(mockSavedEvent);
+
+            await createEvent(req, res);
+
+            expect(res.status).toHaveBeenCalledWith(201);
+            expect(res.json).toHaveBeenCalledWith(mockSavedEvent);
+        });
+
+        it('should return 500 if there is a server error during event creation', async () => {
+            const req = {
+                body: {
+                    eventName: 'Test Event',
+                    description: 'Test Description',
+                    location: 'Test Location',
+                    reqSkills: ['skill1'],
+                    urgency: 'High',
+                    eventDate: '2024-12-12'
+                }
+            };
+            const res = {
+                status: jest.fn().mockReturnThis(),
+                json: jest.fn()
+            };
+
+            Event.prototype.save.mockRejectedValue(new Error('Database error'));
+
+            await createEvent(req, res);
+
+            expect(res.status).toHaveBeenCalledWith(500);
+            expect(res.json).toHaveBeenCalledWith({ error: 'Server error' });
+        });
+    });
+
+    describe('editEvent', () => {
+        it('should return 400 if required fields are missing', async () => {
+            const req = {
+                body: {
+                    eventName: 'Updated Event',
+                },
+                params: { id: '12345' }
+            };
+            const res = {
+                status: jest.fn().mockReturnThis(),
+                json: jest.fn()
+            };
+
+            await editEvent(req, res);
+
+            expect(res.status).toHaveBeenCalledWith(400);
+            expect(res.json).toHaveBeenCalledWith({ error: 'All fields are required' });
+        });
+
+        it('should return 400 if requiredSkills is not an array', async () => {
+            const req = {
+                body: {
+                    eventName: 'Updated Event',
+                    eventDescription: 'Updated Description',
+                    location: 'Updated Location',
+                    requiredSkills: 'not-an-array',
+                    urgency: 'High',
+                    eventDate: '2024-12-12'
+                },
+                params: { id: '12345' }
+            };
+            const res = {
+                status: jest.fn().mockReturnThis(),
+                json: jest.fn()
+            };
+
+            await editEvent(req, res);
+
+            expect(res.status).toHaveBeenCalledWith(400);
+            expect(res.json).toHaveBeenCalledWith({ error: 'requiredSkills must be an array' });
+        });
+
+        it('should return 404 if event is not found', async () => {
+            const req = {
+                body: {
+                    eventName: 'Updated Event',
+                    eventDescription: 'Updated Description',
+                    location: 'Updated Location',
+                    requiredSkills: ['skill1'],
+                    urgency: 'High',
+                    eventDate: '2024-12-12'
+                },
+                params: { id: 'nonexistent-id' }
+            };
+            const res = {
+                status: jest.fn().mockReturnThis(),
+                json: jest.fn()
+            };
+
+            Event.findByIdAndUpdate.mockResolvedValue(null);
+
+            await editEvent(req, res);
+
+            expect(res.status).toHaveBeenCalledWith(404);
+            expect(res.json).toHaveBeenCalledWith({ error: 'Event not found' });
+        });
+
+        it('should update an event and return it', async () => {
+            const req = {
+                body: {
+                    eventName: 'Updated Event',
+                    eventDescription: 'Updated Description',
+                    location: 'Updated Location',
+                    requiredSkills: ['skill1'],
+                    urgency: 'High',
+                    eventDate: '2024-12-12'
+                },
+                params: { id: '12345' }
+            };
+            const res = {
+                status: jest.fn().mockReturnThis(),
+                json: jest.fn()
+            };
+
+            const mockUpdatedEvent = {
+                _id: '12345',
+                eventName: 'Updated Event',
+                eventDescription: 'Updated Description',
+                location: 'Updated Location',
+                reqSkills: ['skill1'],
+                urgency: 'High',
+                eventDate: new Date('2024-12-12')
+            };
+
+            Event.findByIdAndUpdate.mockResolvedValue(mockUpdatedEvent);
+
+            await editEvent(req, res);
+
+            expect(res.status).toHaveBeenCalledWith(200);
+            expect(res.json).toHaveBeenCalledWith(mockUpdatedEvent);
+        });
+
+        it('should return 500 if there is a server error during event update', async () => {
+            const req = {
+                body: {
+                    eventName: 'Updated Event',
+                    eventDescription: 'Updated Description',
+                    location: 'Updated Location',
+                    requiredSkills: ['skill1'],
+                    urgency: 'High',
+                    eventDate: '2024-12-12'
+                },
+                params: { id: '12345' }
+            };
+            const res = {
+                status: jest.fn().mockReturnThis(),
+                json: jest.fn()
+            };
+
+            Event.findByIdAndUpdate.mockRejectedValue(new Error('Database error'));
+
+            await editEvent(req, res);
+
+            expect(res.status).toHaveBeenCalledWith(500);
+            expect(res.json).toHaveBeenCalledWith({ error: 'Server error in editEvent' });
+        });
+    });
+
+    describe('getSavedEvents', () => {
+        it('should return all saved events', async () => {
+            const req = {};
+            const res = {
+                status: jest.fn().mockReturnThis(),
+                json: jest.fn()
+            };
+
+            // Mocking Event.find to return mock data
+            const mockEvents = [{ eventName: 'Event 1' }, { eventName: 'Event 2' }];
+            Event.find.mockResolvedValue(mockEvents);
+
+            await getSavedEvents(req, res);
+
+            expect(res.status).toHaveBeenCalledWith(200);
+            expect(res.json).toHaveBeenCalledWith(mockEvents);
+        });
+
+        it('should return 500 if there is a server error', async () => {
+            const req = {};
+            const res = {
+                status: jest.fn().mockReturnThis(),
+                json: jest.fn()
+            };
+
+            // Mocking Event.find to simulate an error
+            Event.find.mockRejectedValue(new Error('Database error'));
+
+            await getSavedEvents(req, res);
+
+            expect(res.status).toHaveBeenCalledWith(500);
+            expect(res.json).toHaveBeenCalledWith({ error: 'Server error' });
+        });
     });
 });
