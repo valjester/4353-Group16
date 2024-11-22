@@ -3,9 +3,9 @@ const PDFDocument = require('pdfkit');
 const User = require('../models/User');
 const Event = require('../models/Event');
 
-const generateVolunteerReportPDF = asyncHandler(async (req, res) => {
+const generateVolunteerPDF = asyncHandler(async (req, res) => {
     try {
-        const users = await User.find({});
+        const users = await User.find({ role: 'volunteer' });
         const events = await Event.find({});
 
         const doc = new PDFDocument();
@@ -15,7 +15,7 @@ const generateVolunteerReportPDF = asyncHandler(async (req, res) => {
 
         doc.pipe(res);
 
-        doc.fontSize(20).text('Volunteer and Event Report', { align: 'center' });
+        doc.fontSize(20).text('Volunteer Report', { align: 'center' });
         doc.moveDown();
 
         doc.fontSize(16).text('Volunteers', { underline: true });
@@ -39,13 +39,33 @@ const generateVolunteerReportPDF = asyncHandler(async (req, res) => {
             doc.moveDown();
         });
 
-        doc.addPage();
+        doc.end();
+    } catch (error) {
+        console.error('Error generating PDF report:', error);
+        res.status(500).json({ error: 'Failed to generate the report.' });
+    }
+});
+
+const generateEventPDF = asyncHandler(async (req, res) => {
+    try {
+        const users = await User.find({ role: 'volunteer' });
+        const events = await Event.find({});
+        const doc = new PDFDocument();
+
+        res.setHeader('Content-Type', 'application/pdf');
+        res.setHeader('Content-Disposition', 'attachment; filename=Event_Report.pdf');
+
+        doc.pipe(res);
+
+        doc.fontSize(20).text('Event Report', { align: 'center' });
+        doc.moveDown();
+
         doc.fontSize(16).text('Events', { underline: true });
         doc.moveDown();
 
         events.forEach(event => {
             const assignedVolunteers = users.filter(user => user.history.includes(event._id.toString()));
-
+        
             doc.fontSize(14).text(`Event: ${event.eventName}`);
             doc.fontSize(12).text(`Date: ${new Date(event.eventDate).toLocaleDateString()}`);
             doc.text(`Location: ${event.location}`);
@@ -60,12 +80,71 @@ const generateVolunteerReportPDF = asyncHandler(async (req, res) => {
             }
             doc.moveDown();
         });
-
         doc.end();
     } catch (error) {
-        console.error('Error generating PDF report:', error);
-        res.status(500).json({ error: 'Failed to generate the report.' });
+        console.error('Error generating event PDF report:', error);
+        res.status(500).json({ error: 'Failed to generate the event PDF report.' });
     }
 });
 
-module.exports = { generateVolunteerReportPDF };
+const generateVolunteerCSV = asyncHandler(async (req, res) => {
+    try {
+        const users = await User.find({ role: 'volunteer' });
+        const events = await Event.find({});
+
+        let csvContent = 'Volunteer Name, Email, Events Participated\n';
+
+        users.forEach(user => {
+            const userEvents = events.filter(event => user.history.includes(event._id.toString()));
+            const eventNames = userEvents.map(event => `${event.eventName} (${new Date(event.eventDate).toLocaleDateString()})`).join('; ') || 'No events participated';
+            csvContent += `"${user.fullName}", "${user.email}", "${eventNames}"\n`;
+        });
+
+        res.setHeader('Content-Type', 'text/csv');
+        res.setHeader('Content-Disposition', 'attachment; filename=Volunteer_Report.csv');
+        res.send(csvContent);
+    } catch (error) {
+        console.error('Error generating volunteer CSV report:', error);
+        res.status(500).json({ error: 'Failed to generate the volunteer CSV report.' });
+    }
+});
+
+const generateEventCSV = asyncHandler(async (req, res) => {
+    try {
+        //const users = await User.find({ role: 'volunteer' });
+        //const events = await Event.find({});
+        const events = await Event.find({}).populate('volunteersAssigned');
+
+        const escapeCSV = (str) => {
+            if (str.includes(',') || str.includes('\n') || str.includes('"')) {
+                return `"${str.replace(/"/g, '""')}"`;
+            }
+            return str;
+        };
+
+        let csvContent = 'Event Name, Date, Location, Description, Assigned Volunteers\n';
+
+        events.forEach(event => {
+            const volunteerNames = event.volunteersAssigned
+                .map(volunteer => `${volunteer.fullName} (${volunteer.email})`)
+                .join('; ') || 'No volunteers assigned';
+
+            // Append each event's data to the CSV content
+            csvContent += `${escapeCSV(event.eventName)}, ${escapeCSV(new Date(event.eventDate).toISOString().split('T')[0])}, ${escapeCSV(event.location)}, ${escapeCSV(event.description)}, ${escapeCSV(volunteerNames)}\n`;
+        });
+
+        res.setHeader('Content-Type', 'text/csv');
+        res.setHeader('Content-Disposition', 'attachment; filename=Event_Report.csv');
+        res.send(csvContent);
+    } catch (error) {
+        console.error('Error generating event CSV report:', error);
+        res.status(500).json({ error: 'Failed to generate the event CSV report.' });
+    }
+});
+
+
+module.exports = { generateVolunteerPDF, generateEventPDF, generateEventCSV, generateVolunteerCSV };
+
+
+
+

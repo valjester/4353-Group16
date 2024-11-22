@@ -18,12 +18,15 @@ app.use(express.json());
 const userRoutes = require('./routes/userRoutes');
 const eventRoutes = require('./routes/eventRoutes');
 const notificationRoutes = require('./routes/notificationRoutes');
-const { generateVolunteerReportPDF } = require('./controllers/reportController');
+const { generateVolunteerPDF, generateVolunteerCSV, generateEventPDF, generateEventCSV } = require('./controllers/reportController');//
 
 app.use('/api/users', userRoutes);
 app.use('/api/events', eventRoutes);
 app.use('/api/notifications', notificationRoutes);
-app.get('/api/reports/volunteer-pdf', generateVolunteerReportPDF);
+app.get('/api/reports/volunteer-pdf', generateVolunteerPDF);
+app.get('/api/reports/volunteer-csv', generateVolunteerCSV);
+app.get('/api/reports/event-pdf', generateEventPDF);
+app.get('api/reports/event-csv', generateEventCSV);
 
 app.listen(PORT, () => {
   console.log(`Backend server running on port ${PORT}`);
