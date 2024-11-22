@@ -77,7 +77,7 @@ function MatchingForm() {
         </div>
       );
     }
-    return <p>Please select an event.</p>;
+    /* return <p>Please select an event.</p>; */
   };
 
   const renderVolunteerContent = () => {
@@ -92,7 +92,7 @@ function MatchingForm() {
         </div>
       );
     }
-    return <p>Please select one or more volunteers.</p>;
+    /* return <p>Please select one or more volunteers.</p>; */
   };
 
   const handleSubmit = async (e) => {
